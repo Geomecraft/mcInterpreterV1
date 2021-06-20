@@ -1,0 +1,5 @@
+Manifest(tryDataPack, 6, some random description)
+
+recipe.shaped(cursed_iron, iron_block, 2,
+                stone, stone,
+                dirt, oak_planks)

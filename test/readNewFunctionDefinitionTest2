@@ -1,0 +1,3 @@
+def try2(/player /command){
+    execute as /player run /command
+}
