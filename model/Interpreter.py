@@ -5,13 +5,14 @@ from model import BuiltInFn
 from model.DebugLog import DebugElementInfo, DebugElementMemory, DebugLog
 from model.Exceptions import AbstractionError, IncorrectArguments, SyntaxError, NullError
 from model.Function import Function
+from model.Memory import Memory
 from model.Options import Options
 
 
 class Interpreter:
     def __init__(self, content = None, memory=None, currentLineNumber=1, currentLineString = "", options=None, debugLog=None):
         if memory is None:
-            memory = {}
+            memory = Memory()
         if options is None:
             options = Options()
         if debugLog is None:
@@ -24,7 +25,7 @@ class Interpreter:
         self.debugLog = debugLog #type DebugLog
 
     #EFFECTS: read in all of a certain file, and then store the information as a list with each element representing a line. list Index is lined up with line number
-    #MODIFIES: this.content
+    #MODIFIES: self.content
     def setContent(self, filePath):
         f = open(filePath, "r")
         self.content = ["placeHolder"] #so list index line up with line number
@@ -32,9 +33,19 @@ class Interpreter:
         f.close()
 
     #EFFECTS: extract the line in string corresponding to the current line number to be processed. Begining and end spaces are removed since indent does not matter in this language.
-    #MODIFIES: this.content
+    #MODIFIES: self.currentLine
     def setCurrentLine(self):
         self.currentLine = self.content[self.currentLineNumber].strip()
+
+    #EFFECTS: line number increases by one and setCurrentLine
+    #MODIFIES: self.currentLine and self.currentLineNumber
+    def gotoNextLine(self):
+        self.currentLineNumber += 1
+        self.setCurrentLine()
+
+    def generateExceptionLineMessage(self):
+        return "At line " + str(self.currentLineNumber) + ", "
+
 
 
     #EFFECTS: see if this line of code is suppose to do X (for all isX function below)
@@ -45,12 +56,13 @@ class Interpreter:
         pass
 
     def isFunctionDefinition(self):
-        FUNCTION_DEFINITION_SYNTAX = re.compile(r"def\s+(abstract\s+)?(\S)+\(.*")
+        FUNCTION_DEFINITION_SYNTAX = re.compile(r"def\s+(abstract\s+)?(\S)+\(.*\)\s*{")
         return FUNCTION_DEFINITION_SYNTAX.fullmatch(self.currentLine)
 
     def isFunctionUsage(self):
-        FUNCTION_USAGE_SYNTAX = re.compile(r"(\S)+\(.*")
+        FUNCTION_USAGE_SYNTAX = re.compile(r"(\S)+\(.*\)")
         return FUNCTION_USAGE_SYNTAX.fullmatch(self.currentLine)
+
 
 
     #EFFECTS: do nothing because it is a comment
@@ -61,8 +73,17 @@ class Interpreter:
     def interpretAsVariableAssignment(self):
         pass
 
+    #EFFECTS: write the newly defined function in memory, and implement it if it is not an abstract function
     def interpretAsFunctionDefinition(self):
-        pass
+        los = [self.currentLine[:-1].strip()]
+        self.gotoNextLine()
+        while(self.currentLine != "}"):
+            los.append(self.currentLine)
+            self.gotoNextLine()
+        fn = Function.constructInterpretation(self, los)
+        self.memory.memory[fn.name] = fn
+
+
 
     #EFFECTS: if it is a build in function, execute its function. If it is a user defined function, return its minecraft command line body equivalence
     def interpretAsFunctionUsage(self):
@@ -72,7 +93,7 @@ class Interpreter:
 
     def interpret(self, filePath):
         self.setContent(filePath)
-        maximumLineNumber = len(self.content)
+        maximumLineNumber = len(self.content) - 1
 
         while (self.currentLineNumber <= maximumLineNumber):
             self.setCurrentLine()
@@ -84,6 +105,7 @@ class Interpreter:
                 self.interpretAsFunctionDefinition()
             elif self.isFunctionUsage():
                 self.interpretAsFunctionUsage()
+            self.currentLineNumber += 1
 
 
 

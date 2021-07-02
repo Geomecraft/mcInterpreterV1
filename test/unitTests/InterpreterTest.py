@@ -18,13 +18,13 @@ def isFunctionDefinitionTest():
     #true tests
     interpreter.currentLine = "def Manifest(){"
     assert interpreter.isFunctionDefinition()
-    interpreter.currentLine = "def abstract enf(e, ph)"
+    interpreter.currentLine = "def abstract enf(e, ph){"
     assert interpreter.isFunctionDefinition()
     interpreter.currentLine = "def Biom?(){"
     assert interpreter.isFunctionDefinition()
-    interpreter.currentLine = "def  Manifest(parameter1, parameter 2)"
+    interpreter.currentLine = "def  Manifest(parameter1, parameter 2){"
     assert interpreter.isFunctionDefinition()
-    interpreter.currentLine = "def     abstract     Manifest("
+    interpreter.currentLine = "def     abstract     Manifest()  {"
     assert interpreter.isFunctionDefinition()
     #false tests
     interpreter.currentLine = "def (){"
@@ -49,7 +49,7 @@ def isFunctionUsageTest():
     assert interpreter.isFunctionUsage()
     interpreter.currentLine = "Manifest!(argument1,argument2)"
     assert interpreter.isFunctionUsage()
-    interpreter.currentLine = "try(7843r0e9itwruy,"
+    interpreter.currentLine = "try(7843r0e9itwruy,)"
     assert interpreter.isFunctionUsage()
     #false tests
     interpreter.currentLine = "def Manifest(){"
@@ -63,3 +63,17 @@ def isFunctionUsageTest():
     interpreter.currentLine = "()"
     assert not interpreter.isFunctionUsage()
 isFunctionUsageTest()
+
+def interpretAsFunctionDefinitionTest():
+    def readAbstractFunctionOnlyCommands():
+        interpreter = Interpreter()
+        interpreter.interpret("interpretAsFunctionDefinitionTestFile_readAbstractFunctionOnlyCommands")
+        fn = interpreter.memory.memory["smiteWithinDistance"]
+        assert (fn.name == "smiteWithinDistance")
+        assert (fn.parameters == ['centerEntity', 'smiteEntityType', 'distance'])
+        assert (fn.definition == ['execute at <centerEntity> run execute at @e[type=<smiteEntityType>,distance=..<distance>] run summon lightning_bolt ~ ~ ~', 'msg <centerEntity> somebody tried to go close to you within distance <distance>, and got snipped'])
+        assert (fn.abstraction == True)
+    readAbstractFunctionOnlyCommands()
+interpretAsFunctionDefinitionTest()
+
+    

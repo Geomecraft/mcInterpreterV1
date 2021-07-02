@@ -12,3 +12,4 @@ class NullError(Exception):
 
 class NamespaceError(Exception):
     pass
+
