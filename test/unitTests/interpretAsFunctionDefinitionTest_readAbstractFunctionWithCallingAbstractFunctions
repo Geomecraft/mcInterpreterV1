@@ -1,0 +1,9 @@
+def abstract smiteWithinDistance(centerEntity, smiteEntityType, distance){
+    execute at <centerEntity> run execute at @e[type=<smiteEntityType>,distance=..<distance>] run summon lightning_bolt ~ ~ ~
+    msg <centerEntity> somebody tried to go close to you within distance <distance>, and got snipped
+}
+
+def abstract holySmiteWithSelfWithering(entity, smiteEntityType, duration){
+    smiteWithinDistance(<entity>, <smiteEntityType>, 12)
+    effect give <entity> wither <duration>
+}

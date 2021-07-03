@@ -10,6 +10,9 @@ from model.Options import Options
 
 
 class Interpreter:
+    FUNCTION_DEFINITION_SYNTAX = re.compile(r"def\s+(abstract\s+)?(\S)+\(.*\)\s*{")
+    FUNCTION_USAGE_SYNTAX = re.compile(r"(\S)+\(.*\)")
+
     def __init__(self, content = None, memory=None, currentLineNumber=1, currentLineString = "", options=None, debugLog=None):
         if memory is None:
             memory = Memory()
@@ -56,12 +59,10 @@ class Interpreter:
         pass
 
     def isFunctionDefinition(self):
-        FUNCTION_DEFINITION_SYNTAX = re.compile(r"def\s+(abstract\s+)?(\S)+\(.*\)\s*{")
-        return FUNCTION_DEFINITION_SYNTAX.fullmatch(self.currentLine)
+        return self.FUNCTION_DEFINITION_SYNTAX.fullmatch(self.currentLine)
 
     def isFunctionUsage(self):
-        FUNCTION_USAGE_SYNTAX = re.compile(r"(\S)+\(.*\)")
-        return FUNCTION_USAGE_SYNTAX.fullmatch(self.currentLine)
+        return self.FUNCTION_USAGE_SYNTAX.fullmatch(self.currentLine)
 
 
 
@@ -80,7 +81,7 @@ class Interpreter:
         while(self.currentLine != "}"):
             los.append(self.currentLine)
             self.gotoNextLine()
-        fn = Function.constructInterpretation(self, los)
+        fn = Function.constructFromInterpretation(self, los)
         self.memory.memory[fn.name] = fn
 
 

@@ -1,9 +1,5 @@
-class try1:
-    def __init__(self):
-        self.one = "asdf"
-        self.two = self.one
+from model.General import stripEachItem
 
-
-lol = try1()
-lol.one = ("qwer")
-print(lol.two)
+str = "asdf\n"
+print(str)
+print(str[:-1])

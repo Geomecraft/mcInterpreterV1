@@ -74,6 +74,23 @@ def interpretAsFunctionDefinitionTest():
         assert (fn.definition == ['execute at <centerEntity> run execute at @e[type=<smiteEntityType>,distance=..<distance>] run summon lightning_bolt ~ ~ ~', 'msg <centerEntity> somebody tried to go close to you within distance <distance>, and got snipped'])
         assert (fn.abstraction == True)
     readAbstractFunctionOnlyCommands()
+    def readAbstractFunctionWithCallingAbstractFunctions():
+        interpreter = Interpreter()
+        interpreter.interpret("interpretAsFunctionDefinitionTest_readAbstractFunctionWithCallingAbstractFunctions")
+        fn1 = interpreter.memory.memory["smiteWithinDistance"]
+        fn2 = interpreter.memory.memory["holySmiteWithSelfWithering"]
+        assert (fn1.name == "smiteWithinDistance")
+        assert (fn1.parameters == ['centerEntity', 'smiteEntityType', 'distance'])
+        assert (fn1.definition == ['execute at <centerEntity> run execute at @e[type=<smiteEntityType>,distance=..<distance>] run summon lightning_bolt ~ ~ ~', 'msg <centerEntity> somebody tried to go close to you within distance <distance>, and got snipped'])
+        assert (fn1.abstraction == True)
+        assert (fn2.name == "holySmiteWithSelfWithering")
+        assert (fn2.parameters == ['entity', 'smiteEntityType', 'duration'])
+        assert (fn2.definition == [
+            'execute at <entity> run execute at @e[type=<smiteEntityType>,distance=..12] run summon lightning_bolt ~ ~ ~',
+            'msg <entity> somebody tried to go close to you within distance 12, and got snipped',
+            'effect give <entity> wither <duration>'])
+        assert (fn2.abstraction == True)
+    readAbstractFunctionWithCallingAbstractFunctions()
 interpretAsFunctionDefinitionTest()
 
     
