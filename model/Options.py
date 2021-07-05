@@ -1,3 +1,4 @@
 class Options:
-    def __init__(self,recordDebugLog=True):
-        self.recordDebuglog = recordDebugLog #boolean
+    def __init__(self,recordDebugLog=True, datapackOutputPath = ""):
+        self.recordDebuglog = recordDebugLog
+        self.datapackOutputPath = datapackOutputPath

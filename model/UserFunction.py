@@ -1,7 +1,7 @@
-from model.General import stripEachItem
+from model.General import stripEachItem, readFunctionUsage
 
 
-class Function:
+class UserFunction:
 
     def __init__(self, name="", parameters=None, definition=None, abstraction = None):
         # class invariants:
@@ -54,8 +54,8 @@ class Function:
         if len(los) > 1:
             for i in range(1,len(los)):
                 if interpreter.FUNCTION_USAGE_SYNTAX.fullmatch(los[i]): #is a function call (required to be non-built in function)
-                    fnName = los[i].split("(")[0]
-                    fnlop = los[i].split("(")[1][:-1].split(",")
+                    fnName = readFunctionUsage(los[i])[0]
+                    fnlop = readFunctionUsage(los[i])[1]
                     stripEachItem(fnlop)
                     definition += interpreter.memory.memory[fnName].useAbstractFn(fnlop)
                 else:
