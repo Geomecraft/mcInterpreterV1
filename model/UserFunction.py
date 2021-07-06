@@ -75,6 +75,14 @@ class UserFunction:
                 substituedBody.append(substituedLine)
             return substituedBody
 
+    #helper to implement non-abstract functions
+    def commandRepresentation(self):
+        str = ""
+        for x in self.definition:
+            str += x
+            str += "\n"
+        return str
+
 
 
 

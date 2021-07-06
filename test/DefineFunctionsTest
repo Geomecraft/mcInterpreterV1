@@ -1,0 +1,24 @@
+Manifest(DefineFunctionTest, 6, just a datapack to test defining functions)
+namespace.set(functest)
+
+def abstract smite_within_distance(centerEntity, smiteEntityType, distance){
+    execute at <centerEntity> run execute at @e[type=<smiteEntityType>,distance=..<distance>] run summon lightning_bolt ~ ~ ~
+    msg <centerEntity> somebody tried to go close to you within distance <distance>, and got snipped
+}
+
+def abstract holy_smite_with_selfRegen(entity, smiteEntityType, duration, level){
+    smite_within_distance(<entity>, <smiteEntityType>, 12)
+    effect give <entity> regeneration <duration> <level>
+}
+
+def holy_smitelv1(){
+    holy_smite_with_selfRegen(@a, zombie, 1, 0)
+}
+
+def holy_smitelv2(){
+    holy_smite_with_selfRegen(@a, zombie, 3, 0)
+}
+
+def holy_smitelv3(){
+    holy_smite_with_selfRegen(@a, zombie, 5, 1)
+}

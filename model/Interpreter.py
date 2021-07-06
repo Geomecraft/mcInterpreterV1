@@ -5,7 +5,7 @@ import re
 from model import BuiltInFunction
 from model.DebugLog import DebugElementInfo, DebugElementMemory, DebugLog
 from model.Exceptions import AbstractionError, IncorrectArguments, SyntaxError, NullError
-from model.General import stripEachItem, readFunctionUsage
+from model.General import stripEachItem, readFunctionUsage, assertExistNamespace
 from model.UserFunction import UserFunction
 from model.Memory import Memory
 from model.Options import Options
@@ -88,7 +88,9 @@ class Interpreter:
         fn = UserFunction.constructFromInterpretation(self, los)
         self.memory.memory[fn.name] = fn
         if not fn.abstraction: #non abstract, need to implement the function
-            pass
+            assertExistNamespace(self.memory)
+            with open(self.memory.getCurrentNamespacePath() + "/functions/" + fn.name + ".mcfunction", 'w') as outfile:
+                outfile.write(fn.commandRepresentation())
 
     #EFFECTS: it is a build in function, execute the function.
     def interpretAsFunctionUsage(self):
@@ -105,6 +107,7 @@ class Interpreter:
 
     def interpret(self, filePath):
         self.setContent(filePath)
+        originalPath = os.getcwd()
         os.chdir(os.getcwd() + self.options.datapackOutputPath)
         maximumLineNumber = len(self.content) - 1
 
@@ -119,5 +122,8 @@ class Interpreter:
             elif self.isFunctionUsage():
                 self.interpretAsFunctionUsage()
             self.currentLineNumber += 1
+
+        #change back to original path
+        os.chdir(originalPath)
 
 

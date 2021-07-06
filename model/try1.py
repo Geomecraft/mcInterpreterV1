@@ -11,11 +11,3 @@
 #             self.numParameterCheck(loa)
 #             self.typeParameterCheck(loa)
 #         self.use
-def a(p1,p2,p3,p4,p5):
-    pass
-
-print(
-    a(1,
-      2,
-      3,4,5)
-)

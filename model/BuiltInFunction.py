@@ -3,6 +3,7 @@ import json
 from math import sqrt
 
 from model.Exceptions import IncorrectArguments, NamespaceError
+from model.General import assertExistNamespace
 
 
 class BuiltInFunction:
@@ -19,12 +20,7 @@ BuiltInFunctionsDict = {}
 
 
 
-#Assert preconditions
-def assertExistNamespace(memory):
-    try:
-        memory.currentNamespace
-    except: #what error?
-        raise NamespaceError("no current namespace is set")
+
 
 
 

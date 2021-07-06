@@ -26,8 +26,13 @@ def RecipeTest():
     interpreter = Interpreter()
     interpreter.options.datapackOutputPath = "/output"
     interpreter.interpret("test/RecipeTest")
+def DefineFunctionsTest():
+    interpreter = Interpreter()
+    interpreter.options.datapackOutputPath = "/output"
+    interpreter.interpret("test/DefineFunctionsTest")
 
 #Actual impelmenting stuff, run with caution
 # ManifestTest()
-RecipeTest()
+# RecipeTest()
+# DefineFunctionsTest()
 
