@@ -1,1 +1,0 @@
-function perk:enhanced_resiliance

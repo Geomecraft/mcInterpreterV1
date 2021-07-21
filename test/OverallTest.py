@@ -3,8 +3,8 @@ import os
 
 #change path to mcInterpreterV1
 # print(os.getcwd())
-parentPath = os.path.dirname(os.getcwd())
-os.chdir(parentPath)
+# parentPath = os.path.dirname(os.getcwd())
+# os.chdir(parentPath)
 # print(os.getcwd())
 
 #helpers
@@ -25,16 +25,16 @@ def setupInterpreter():
 #actual tests
 def ManifestTest():
     interpreter = setupInterpreter()
-    interpreter.interpret("test/ManifestTest")
+    interpreter.interpret("ManifestTest")
 def RecipeTest():
     interpreter = setupInterpreter()
-    interpreter.interpret("test/RecipeTest")
+    interpreter.interpret("RecipeTest")
 def DefineNonAbstractFunctionsTest():
     interpreter = setupInterpreter()
-    interpreter.interpret("test/DefineNonAbstractFunctionsTest")
+    interpreter.interpret("DefineNonAbstractFunctionsTest")
 
 #Actual impelmenting stuff, run with caution
 # ManifestTest()
 # RecipeTest()
-DefineNonAbstractFunctionsTest()
+# DefineNonAbstractFunctionsTest()
 

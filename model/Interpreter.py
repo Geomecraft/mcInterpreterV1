@@ -74,7 +74,7 @@ class Interpreter:
     def interpretAsComment(self):
         pass
 
-    #EFFECTS: write in memory that the name of the varible can access its value (the varialbe object)
+    #EFFECTS: write in memory that the name of the varible can access its value (the variable object)
     def interpretAsVariableAssignment(self):
         pass
 

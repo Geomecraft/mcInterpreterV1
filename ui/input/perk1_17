@@ -5,6 +5,9 @@ namespace.set(perk)
 def abstract forPerk(perkScore, runnable){
     execute as @a[scores={<perkScore>=1}] run execute at @s run <runnable>
 }
+def abstract loop(function, waitTime){
+    schedule function <function> <waitTime>
+}
 
 #basic set up
 def abstract basicPropertyScoreboardSetup(){
