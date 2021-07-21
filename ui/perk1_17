@@ -1,0 +1,42 @@
+Manifest(perk for 1_17 manhunt, 7, by ItsGeomecraft)
+namespace.set(perk)
+
+#some general purpose abstraction functions
+def abstract forPerk(perkScore, runnable){
+    execute as @a[scores={<perkScore>=1}] run execute at @s run <runnable>
+}
+
+#basic set up
+def abstract basicPropertyScoreboardSetup(){
+    scoreboard objectives add health health
+}
+def abstract perkScoresDeclare(){
+
+    #Enhanced Resilience
+    scoreboard objectives add en_re dummy
+
+    #Holy Smite
+    scoreboard objectives add ho_sm dummy
+
+    #Fragmentation
+    scoreboard objectives add frag dummy
+}
+def load(){
+    basicPropertyScoreboardSetup()
+    perkScoresDeclare()
+}
+
+#actual perk
+def enhanced_resiliance_loop(){
+    forPerk(en_re, execute if score @s health matches 10.. run effect give @s resistance 3 0 true)
+    forPerk(en_re, execute if score @s health matches ..10 run effect give @s resistance 3 1 true)
+    schedule function perk:enhanced_resiliance_loop 1t
+}
+def enhanced_resiliance(){
+    function perk:enhanced_resiliance_loop
+}
+
+#starting function
+def start(){
+    function perk:enhanced_resiliance
+}

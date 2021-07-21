@@ -91,6 +91,10 @@ def interpretAsFunctionDefinitionTest():
             'effect give <entity> wither <duration>'])
         assert (fn2.abstraction == True)
     readAbstractFunctionWithCallingAbstractFunctions()
+    def readAbstractFunctionWithCallingBuiltInFunctions():
+        interpreter = Interpreter()
+        interpreter.interpret("interpretAsFunctionDefinitionTest_readAbstractFunctionWithCallingBuiltInFunctions")
+        # fn = interpreter.memory.memory[]
 interpretAsFunctionDefinitionTest()
 
     

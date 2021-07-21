@@ -8,5 +8,6 @@ recipe.shapeless(just_4, fern, 4, fern, fern, fern, fern)
 
 #3x3 recipe
 recipe.shaped(cursed_gold, gold_block, 1, stone, stone, sand, empty, gravel, empty, gravel, gravel, sand)
+recipe.shaped(fake_emerald_block, emerald_block, 1, lime_dye, lime_dye, lime_dye, lime_dye, chiseled_stone_bricks, lime_dye, lime_dye, lime_dye, lime_dye)
 recipe.shapeless(cursed_gold_ingot, gold_ingot, 1, stone, stone, bow, glass, beacon)
 recipe.shapeless(just_9, redstone_block, 1, stone, stone, bow, glass, beacon, dirt, dirt, dirt, dirt)

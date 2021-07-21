@@ -17,22 +17,24 @@ def assertException(testPath, exceptionMessage):
 
 
 
+#before
+def setupInterpreter():
+    interpreter = Interpreter()
+    interpreter.options.datapackOutputPath = "/output"
+    return interpreter
 #actual tests
 def ManifestTest():
-    interpreter = Interpreter()
-    interpreter.options.datapackOutputPath = "/output"
+    interpreter = setupInterpreter()
     interpreter.interpret("test/ManifestTest")
 def RecipeTest():
-    interpreter = Interpreter()
-    interpreter.options.datapackOutputPath = "/output"
+    interpreter = setupInterpreter()
     interpreter.interpret("test/RecipeTest")
-def DefineFunctionsTest():
-    interpreter = Interpreter()
-    interpreter.options.datapackOutputPath = "/output"
-    interpreter.interpret("test/DefineFunctionsTest")
+def DefineNonAbstractFunctionsTest():
+    interpreter = setupInterpreter()
+    interpreter.interpret("test/DefineNonAbstractFunctionsTest")
 
 #Actual impelmenting stuff, run with caution
 # ManifestTest()
 # RecipeTest()
-# DefineFunctionsTest()
+DefineNonAbstractFunctionsTest()
 

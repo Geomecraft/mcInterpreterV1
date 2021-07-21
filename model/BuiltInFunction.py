@@ -14,15 +14,8 @@ class BuiltInFunction:
 #path stuff
 # path = os.getcwd()
 # print("Current working directory is " + '\033[94m' + path + '\033[0m')
-LETTERS_FOR_RECIPE = ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
 INDENT = 4
 BuiltInFunctionsDict = {}
-
-
-
-
-
-
 
 #Actual functions
 def Manifest(interpreter, name, formatNum, description):
@@ -35,6 +28,7 @@ def Manifest(interpreter, name, formatNum, description):
 
     #create default minecraft namespace
     os.mkdir(name + "/data/minecraft")
+    os.makedirs(name + "/data/minecraft/tags/functions")
 
     return "Datapack Manifestation Succesful"
 BuiltInFunctionsDict["Manifest"] = Manifest
@@ -47,10 +41,21 @@ def setCurrentNamespace(interpreter,namespace):
     #subdirectories creation
     os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/recipes")
     os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/functions")
+
+    #create load and tick
+    loadData = {"values":[namespace + ":load"]}
+    with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/load.json", 'w') as outfile:
+        json.dump(loadData, outfile, indent=INDENT)
+    tickData = {"values":[namespace + ":tick"]}
+    with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/tick.json", 'w') as outfile:
+        json.dump(tickData, outfile, indent=INDENT)
+
 BuiltInFunctionsDict["namespace.set"] = setCurrentNamespace
 
 def recipeCraftingShaped(interpreter,*loa):
     assertExistNamespace(interpreter.memory)
+
+    LETTERS_FOR_RECIPE = ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
 
     patternRaw = []
     key = {}
