@@ -57,7 +57,7 @@ class UserFunction:
                     fnName = readFunctionUsage(los[i])[0]
                     fnlop = readFunctionUsage(los[i])[1]
                     stripEachItem(fnlop)
-                    definition += interpreter.memory.memory[fnName].useAbstractFn(fnlop)
+                    definition += interpreter.memory.function[fnName].useAbstractFn(fnlop)
                 else:
                     definition.append(los[i])
 

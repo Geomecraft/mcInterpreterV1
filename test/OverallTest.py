@@ -20,7 +20,7 @@ def assertException(testPath, exceptionMessage):
 #before
 def setupInterpreter():
     interpreter = Interpreter()
-    interpreter.options.datapackOutputPath = "/output"
+    interpreter.options.datapackOutputPath = "output"
     return interpreter
 #actual tests
 def ManifestTest():

@@ -1,11 +1,16 @@
+import json
+
 from model.Interpreter import Interpreter
 from os import listdir, getcwd
+from model.General import clearDirectory
 
 #clean output
+clearDirectory("output")
 
 #produce new data pack
-filelist = listdir(getcwd() + "/input")
-for i in range(0,len(filelist)):
+with open("input/option.json","r") as infile:
+    options = json.loads(infile.read())
     interpreter = Interpreter()
-    interpreter.options.datapackOutputPath = "/output"
-    interpreter.interpret("input/" + filelist[i])
+    interpreter.options.datapackOutputPath = options["outputPath"]
+    interpreter.options.datapackInputPath = options["inputPath"]
+    interpreter.interpret("/" + options["main"])

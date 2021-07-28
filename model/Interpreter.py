@@ -14,10 +14,11 @@ from model.Options import Options
 BUILT_IN_FN = BuiltInFunction.BuiltInFunctionsDict
 
 class Interpreter:
+    CONSTANT_DEFINITION_SYNTAX = re.compile(r".+=.+")
     FUNCTION_DEFINITION_SYNTAX = re.compile(r"def\s+(abstract\s+)?(\S)+\(.*\)\s*{")
     FUNCTION_USAGE_SYNTAX = re.compile(r"(\S)+\(.*")
 
-    def __init__(self, content = None, memory=None, currentLineNumber=1, currentLineString = "", options=None, debugLog=None):
+    def __init__(self, content = None, memory=None, currentLineNumber=1, maximumLineNumber = None, currentLineString = "", options=None, debugLog=None):
         if memory is None:
             memory = Memory()
         if options is None:
@@ -27,6 +28,7 @@ class Interpreter:
         self.content = content #type list of string
         self.memory = memory #type Memory
         self.currentLineNumber = currentLineNumber #type int
+        self.maximumLineNumber = maximumLineNumber #type int
         self.currentLine = currentLineString #type string
         self.options = options #type Options
         self.debugLog = debugLog #type DebugLog
@@ -59,8 +61,8 @@ class Interpreter:
     def isComment(self):
         pass
 
-    def isVariableAssignment(self):
-        pass
+    def isConstantDefinition(self):
+        return self.CONSTANT_DEFINITION_SYNTAX.fullmatch(self.currentLine)
 
     def isFunctionDefinition(self):
         return self.FUNCTION_DEFINITION_SYNTAX.fullmatch(self.currentLine)
@@ -74,9 +76,16 @@ class Interpreter:
     def interpretAsComment(self):
         pass
 
-    #EFFECTS: write in memory that the name of the varible can access its value (the variable object)
-    def interpretAsVariableAssignment(self):
-        pass
+    #EFFECTS: write in memory that the name of the constant, and all constants later are interpreted as this value
+    def interpretAsConstantDefinition(self):
+        name = self.currentLine.split("=")[0].strip()
+        value = self.currentLine.split("=")[1].strip()
+        if (value[0] == "\"" and value[-1] == "\""):
+            value = value[1:-1]
+        self.memory.constant[name] = value
+        for i in range(self.currentLineNumber, self.maximumLineNumber):
+            self.content[i] = self.content[i].replace(">" + name + "<", value)
+
 
     #EFFECTS: write the newly defined function in memory, and implement it if it is not an abstract function
     def interpretAsFunctionDefinition(self):
@@ -86,7 +95,7 @@ class Interpreter:
             los.append(self.currentLine)
             self.gotoNextLine()
         fn = UserFunction.constructFromInterpretation(self, los)
-        self.memory.memory[fn.name] = fn
+        self.memory.function[fn.name] = fn
         if not fn.abstraction: #non abstract, need to implement the function
             assertExistNamespace(self.memory)
             with open(self.memory.getCurrentNamespacePath() + "/functions/" + fn.name + ".mcfunction", 'w') as outfile:
@@ -106,17 +115,17 @@ class Interpreter:
 
 
     def interpret(self, filePath):
-        self.setContent(filePath)
+        self.setContent(self.options.datapackInputPath + filePath)
         originalPath = os.getcwd()
-        os.chdir(os.getcwd() + self.options.datapackOutputPath)
-        maximumLineNumber = len(self.content) - 1
+        os.chdir(os.getcwd() + "/" + self.options.datapackOutputPath)
+        self.maximumLineNumber = len(self.content) - 1
 
-        while (self.currentLineNumber <= maximumLineNumber):
+        while (self.currentLineNumber <= self.maximumLineNumber):
             self.setCurrentLine()
             if self.isComment():
                 self.interpretAsComment()
-            elif self.isVariableAssignment():
-                self.interpretAsVariableAssignment()
+            elif self.isConstantDefinition():
+                self.interpretAsConstantDefinition()
             elif self.isFunctionDefinition():
                 self.interpretAsFunctionDefinition()
             elif self.isFunctionUsage():

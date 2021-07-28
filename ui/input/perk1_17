@@ -1,11 +1,24 @@
 Manifest(perk for 1_17 manhunt, 7, by ItsGeomecraft)
+
+#-----------------------------------------------------#
+namespace.set(mutual_hunt)
+
+
+
+
+
+
+#-----------------------------------------------------#
 namespace.set(perk)
+
+#CONSTANTS
+EFFECT_DEFAULT_LENGTH = 3
 
 #some general purpose abstraction functions
 def abstract forPerk(perkScore, runnable){
     execute as @a[scores={<perkScore>=1}] run execute at @s run <runnable>
 }
-def abstract loop(function, waitTime){
+def abstract link(function, waitTime){
     schedule function <function> <waitTime>
 }
 
@@ -31,9 +44,9 @@ def load(){
 
 #actual perk
 def enhanced_resiliance_loop(){
-    forPerk(en_re, execute if score @s health matches 10.. run effect give @s resistance 3 0 true)
-    forPerk(en_re, execute if score @s health matches ..10 run effect give @s resistance 3 1 true)
-    schedule function perk:enhanced_resiliance_loop 1t
+    forPerk(en_re, execute if score @s health matches 10.. run effect give @s resistance >EFFECT_DEFAULT_LENGTH< 0 true)
+    forPerk(en_re, execute if score @s health matches ..10 run effect give @s resistance >EFFECT_DEFAULT_LENGTH< 1 true)
+    link(perk:enhanced_resiliance_loop, 1t)
 }
 def enhanced_resiliance(){
     function perk:enhanced_resiliance_loop

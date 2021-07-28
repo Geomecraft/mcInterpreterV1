@@ -68,7 +68,7 @@ def interpretAsFunctionDefinitionTest():
     def readAbstractFunctionOnlyCommands():
         interpreter = Interpreter()
         interpreter.interpret("interpretAsFunctionDefinitionTestFile_readAbstractFunctionOnlyCommands")
-        fn = interpreter.memory.memory["smiteWithinDistance"]
+        fn = interpreter.memory.function["smiteWithinDistance"]
         assert (fn.name == "smiteWithinDistance")
         assert (fn.parameters == ['centerEntity', 'smiteEntityType', 'distance'])
         assert (fn.definition == ['execute at <centerEntity> run execute at @e[type=<smiteEntityType>,distance=..<distance>] run summon lightning_bolt ~ ~ ~', 'msg <centerEntity> somebody tried to go close to you within distance <distance>, and got snipped'])
@@ -77,8 +77,8 @@ def interpretAsFunctionDefinitionTest():
     def readAbstractFunctionWithCallingAbstractFunctions():
         interpreter = Interpreter()
         interpreter.interpret("interpretAsFunctionDefinitionTest_readAbstractFunctionWithCallingAbstractFunctions")
-        fn1 = interpreter.memory.memory["smiteWithinDistance"]
-        fn2 = interpreter.memory.memory["holySmiteWithSelfWithering"]
+        fn1 = interpreter.memory.function["smiteWithinDistance"]
+        fn2 = interpreter.memory.function["holySmiteWithSelfWithering"]
         assert (fn1.name == "smiteWithinDistance")
         assert (fn1.parameters == ['centerEntity', 'smiteEntityType', 'distance'])
         assert (fn1.definition == ['execute at <centerEntity> run execute at @e[type=<smiteEntityType>,distance=..<distance>] run summon lightning_bolt ~ ~ ~', 'msg <centerEntity> somebody tried to go close to you within distance <distance>, and got snipped'])
@@ -94,7 +94,7 @@ def interpretAsFunctionDefinitionTest():
     def readAbstractFunctionWithCallingBuiltInFunctions():
         interpreter = Interpreter()
         interpreter.interpret("interpretAsFunctionDefinitionTest_readAbstractFunctionWithCallingBuiltInFunctions")
-        # fn = interpreter.memory.memory[]
+        # fn = interpreter.memory.function[]
 interpretAsFunctionDefinitionTest()
 
     
