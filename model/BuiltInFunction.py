@@ -30,6 +30,12 @@ def Manifest(interpreter, name, formatNum, description):
     os.mkdir(name + "/data/minecraft")
     os.makedirs(name + "/data/minecraft/tags/functions")
 
+    #create load and tick
+    with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/load.json", 'w') as outfile:
+        json.dump({"values":[]}, outfile, indent=INDENT)
+    with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/tick.json", 'w') as outfile:
+        json.dump({"values":[]}, outfile, indent=INDENT)
+
     return "Datapack Manifestation Succesful"
 BuiltInFunctionsDict["Manifest"] = Manifest
 
@@ -41,12 +47,17 @@ def setCurrentNamespace(interpreter,namespace):
     #subdirectories creation
     os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/recipes")
     os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/functions")
+    os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/item_modifiers")
 
-    #create load and tick
-    loadData = {"values":[namespace + ":load"]}
+    #add on load and tick function for this namespace
+    with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/load.json", 'r') as infile:
+        loadData = json.loads(infile.read())
+        loadData["values"].append(namespace + ":load")
     with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/load.json", 'w') as outfile:
         json.dump(loadData, outfile, indent=INDENT)
-    tickData = {"values":[namespace + ":tick"]}
+    with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/tick.json", 'r') as infile:
+        tickData = json.loads(infile.read())
+        tickData["values"].append(namespace + ":tick")
     with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/tick.json", 'w') as outfile:
         json.dump(tickData, outfile, indent=INDENT)
 
@@ -102,3 +113,32 @@ def recipeCraftingShapeless(interpreter,*loa):
         json.dump(data, outfile, indent=INDENT)
 BuiltInFunctionsDict["recipe.shapeless"] = recipeCraftingShapeless
 
+def itemModifierSetNBT(interpreter, name, target, value):
+    modifier = {"function":"minecraft:set_nbt",
+                target:value}
+    with open(interpreter.memory.getCurrentNamespacePath() + "/item_modifiers/" + name + ".json", 'w') as outfile:
+        json.dump(modifier, outfile, indent=INDENT)
+BuiltInFunctionsDict["item.modifier.setNBT"] = itemModifierSetNBT
+
+#op, sourcePath, targetPath
+
+def itemModifierCopyNBT(interpreter,name, sourceStorage,*loops):
+    ops = []
+    for i in range(0,len(loops),3):
+        sourcePath = loops[i]
+        targetPath = loops[i+1]
+        operation = loops[i+2]
+        ops.append({"source": sourcePath,
+                    "target": targetPath,
+                    "op": operation})
+
+    modifier = {"function": "copy_nbt",
+                "source": {
+                    "type": "storage",
+                    "source": sourceStorage
+                },
+                "ops": ops
+                }
+    with open(interpreter.memory.getCurrentNamespacePath() + "/item_modifiers/" + name + ".json", 'w') as outfile:
+        json.dump(modifier, outfile, indent=INDENT)
+BuiltInFunctionsDict["item.modifier.copyNBT"] = itemModifierCopyNBT

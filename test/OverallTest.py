@@ -35,6 +35,6 @@ def DefineNonAbstractFunctionsTest():
 
 #Actual impelmenting stuff, run with caution
 # ManifestTest()
-# RecipeTest()
+RecipeTest()
 # DefineNonAbstractFunctionsTest()
 

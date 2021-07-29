@@ -3,8 +3,43 @@ Manifest(perk for 1_17 manhunt, 7, by ItsGeomecraft)
 #-----------------------------------------------------#
 namespace.set(mutual_hunt)
 
+def load(){
+    scoreboard objectives add player dummy
+}
 
+def store_player_position_into_storage(){
+#player 1
+execute as @a[scores={player=1},limit=1] at @s store result storage player1_coord X int 1 run data get entity @s Pos[0]
+execute as @a[scores={player=1},limit=1] at @s store result storage player1_coord Y int 1 run data get entity @s Pos[1]
+execute as @a[scores={player=1},limit=1] at @s store result storage player1_coord Z int 1 run data get entity @s Pos[2]
+#player 2
+execute as @a[scores={player=2},limit=1] at @s store result storage player2_coord X int 1 run data get entity @s Pos[0]
+execute as @a[scores={player=2},limit=1] at @s store result storage player2_coord Y int 1 run data get entity @s Pos[1]
+execute as @a[scores={player=2},limit=1] at @s store result storage player2_coord Z int 1 run data get entity @s Pos[2]
+}
 
+def compass_update(){
+execute as @a[scores={player=1},nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}]},limit=1] run item modify entity @s container.8 mutual_hunt:compass_update_player1
+execute as @a[scores={player=2},nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}]},limit=1] run item modify entity @s container.8 mutual_hunt:compass_update_player2
+}
+
+def compass_setup(){
+    item modify entity @s container.8 mutual_hunt:compass_setup
+}
+
+def compass_lose_player(){
+    execute as @a[nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}],Dimension:"minecraft:overworld"}] run item modify entity @s container.8 mutual_hunt:compass_overworld
+    execute as @a[nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}],Dimension:"minecraft:the_nether"}] run item modify entity @s container.8 mutual_hunt:compass_the_nether
+    execute as @a[nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}],Dimension:"minecraft:the_end"}] run item modify entity @s container.8 mutual_hunt:compass_the_end
+}
+
+item.modifier.setNBT(compass_setup, tag, "<{LodestoneDimension:"minecraft:overworld",LodestoneTracked:0b,LodestonePos:{X:1,Y:1,Z:1}}>")
+item.modifier.copyNBT(compass_update_player1, minecraft:player2_coord, X, LodestonePos.X, replace, Y, LodestonePos.Y, replace, Z, LodestonePos.Z, replace)
+item.modifier.copyNBT(compass_update_player2, minecraft:player1_coord, X, LodestonePos.X, replace, Y, LodestonePos.Y, replace, Z, LodestonePos.Z, replace)
+
+item.modifier.setNBT(compass_overworld, tag, "<{LodestoneDimension:"minecraft:overworld"}>")
+item.modifier.setNBT(compass_the_nether, tag, "<{LodestoneDimension:"minecraft:the_nether"}>")
+item.modifier.setNBT(compass_the_end, tag, "<{LodestoneDimension:"minecraft:the_end"}>")
 
 
 

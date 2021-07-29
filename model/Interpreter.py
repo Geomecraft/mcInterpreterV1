@@ -59,7 +59,8 @@ class Interpreter:
 
     #EFFECTS: see if this line of code is suppose to do X (for all isX function below)
     def isComment(self):
-        pass
+        if self.currentLine != "":
+            return self.currentLine[0] == "#"
 
     def isConstantDefinition(self):
         return self.CONSTANT_DEFINITION_SYNTAX.fullmatch(self.currentLine)
@@ -106,7 +107,6 @@ class Interpreter:
         fnstr = self.currentLine
         fnName = readFunctionUsage(fnstr)[0]
         fnlop = readFunctionUsage(fnstr)[1]
-        stripEachItem(fnlop)
         if fnName not in BUILT_IN_FN.keys():
             raise NullError(self.exceptionLineMsg() + "function not found in any built-in library")
         else:
