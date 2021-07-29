@@ -28,9 +28,15 @@ def compass_setup(){
 }
 
 def compass_lose_player(){
-    execute as @a[nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}],Dimension:"minecraft:overworld"}] run item modify entity @s container.8 mutual_hunt:compass_overworld
-    execute as @a[nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}],Dimension:"minecraft:the_nether"}] run item modify entity @s container.8 mutual_hunt:compass_the_nether
-    execute as @a[nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}],Dimension:"minecraft:the_end"}] run item modify entity @s container.8 mutual_hunt:compass_the_end
+    #player1
+    execute if entity @a[scores={player=2},nbt={Dimension:"minecraft:overworld"},limit=1] run execute as @a[scores={player=1},nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}]},limit=1] run item modify entity @s container.8 mutual_hunt:compass_overworld
+    execute if entity @a[scores={player=2},nbt={Dimension:"minecraft:the_nether"},limit=1] run execute as @a[scores={player=1},nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}]},limit=1] run item modify entity @s container.8 mutual_hunt:compass_the_nether
+    execute if entity @a[scores={player=2},nbt={Dimension:"minecraft:the_end"},limit=1] run execute as @a[scores={player=1},nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}]},limit=1] run item modify entity @s container.8 mutual_hunt:compass_the_end
+
+    #player2
+    execute if entity @a[scores={player=1},nbt={Dimension:"minecraft:overworld"},limit=1] run execute as @a[scores={player=2},nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}]},limit=1] run item modify entity @s container.8 mutual_hunt:compass_overworld
+    execute if entity @a[scores={player=1},nbt={Dimension:"minecraft:the_nether"},limit=1] run execute as @a[scores={player=2},nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}]},limit=1] run item modify entity @s container.8 mutual_hunt:compass_the_nether
+    execute if entity @a[scores={player=1},nbt={Dimension:"minecraft:the_end"},limit=1] run execute as @a[scores={player=2},nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}]},limit=1] run item modify entity @s container.8 mutual_hunt:compass_the_end
 }
 
 item.modifier.setNBT(compass_setup, tag, "<{LodestoneDimension:"minecraft:overworld",LodestoneTracked:0b,LodestonePos:{X:1,Y:1,Z:1}}>")
