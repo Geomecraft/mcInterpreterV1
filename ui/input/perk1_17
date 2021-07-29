@@ -1,5 +1,16 @@
 Manifest(perk for 1_17 manhunt, 7, by ItsGeomecraft)
 
+#CONSTANTS
+EFFECT_DEFAULT_LENGTH = 3
+
+#some general purpose abstraction functions
+def abstract forPerk(perkScore, runnable){
+    execute as @a[scores={<perkScore>=1}] run execute at @s run <runnable>
+}
+def abstract link(function, waitTime){
+    schedule function <function> <waitTime>
+}
+
 #-----------------------------------------------------#
 namespace.set(mutual_hunt)
 
@@ -16,11 +27,13 @@ execute as @a[scores={player=1},limit=1] at @s store result storage player1_coor
 execute as @a[scores={player=2},limit=1] at @s store result storage player2_coord X int 1 run data get entity @s Pos[0]
 execute as @a[scores={player=2},limit=1] at @s store result storage player2_coord Y int 1 run data get entity @s Pos[1]
 execute as @a[scores={player=2},limit=1] at @s store result storage player2_coord Z int 1 run data get entity @s Pos[2]
+link(mutual_hunt:store_player_position_into_storage, 1t)
 }
 
 def compass_update(){
 execute as @a[scores={player=1},nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}]},limit=1] run item modify entity @s container.8 mutual_hunt:compass_update_player1
 execute as @a[scores={player=2},nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}]},limit=1] run item modify entity @s container.8 mutual_hunt:compass_update_player2
+link(mutual_hunt:compass_update, 1t)
 }
 
 def compass_setup(){
@@ -37,6 +50,7 @@ def compass_lose_player(){
     execute if entity @a[scores={player=1},nbt={Dimension:"minecraft:overworld"},limit=1] run execute as @a[scores={player=2},nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}]},limit=1] run item modify entity @s container.8 mutual_hunt:compass_overworld
     execute if entity @a[scores={player=1},nbt={Dimension:"minecraft:the_nether"},limit=1] run execute as @a[scores={player=2},nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}]},limit=1] run item modify entity @s container.8 mutual_hunt:compass_the_nether
     execute if entity @a[scores={player=1},nbt={Dimension:"minecraft:the_end"},limit=1] run execute as @a[scores={player=2},nbt={Inventory:[{Slot:8b, id:"minecraft:compass",Count:1b}]},limit=1] run item modify entity @s container.8 mutual_hunt:compass_the_end
+    link(mutual_hunt:compass_lose_player, 1t)
 }
 
 item.modifier.setNBT(compass_setup, tag, "<{LodestoneDimension:"minecraft:overworld",LodestoneTracked:0b,LodestonePos:{X:1,Y:1,Z:1}}>")
@@ -51,17 +65,6 @@ item.modifier.setNBT(compass_the_end, tag, "<{LodestoneDimension:"minecraft:the_
 
 #-----------------------------------------------------#
 namespace.set(perk)
-
-#CONSTANTS
-EFFECT_DEFAULT_LENGTH = 3
-
-#some general purpose abstraction functions
-def abstract forPerk(perkScore, runnable){
-    execute as @a[scores={<perkScore>=1}] run execute at @s run <runnable>
-}
-def abstract link(function, waitTime){
-    schedule function <function> <waitTime>
-}
 
 #basic set up
 def abstract basicPropertyScoreboardSetup(){
@@ -94,6 +97,13 @@ def enhanced_resiliance(){
 }
 
 #starting function
+
 def start(){
+    #compass tracking
+    function mutual_hunt:store_player_position_into_storage
+    function mutual_hunt:compass_update
+    function mutual_hunt:compass_lose_player
+
+    #perk
     function perk:enhanced_resiliance
 }
