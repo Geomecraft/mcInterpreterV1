@@ -1,6 +1,0 @@
-Manifest(tryDataPack, 6, some random description)
-namespace.set(test)
-
-recipe.shaped(cursed_iron, iron_block, 2,
-                stone, stone,
-                dirt)

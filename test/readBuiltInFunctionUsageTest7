@@ -1,5 +1,0 @@
-Manifest(tryDataPack, 6, some random description)
-namespace.set(test)
-
-recipe.shapeless(just_9, redstone_block, 1,
-                stone, stone, bow, glass, beacon, dirt, dirt, dirt, dirt, dirt)

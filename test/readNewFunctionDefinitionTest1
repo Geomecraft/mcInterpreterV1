@@ -1,8 +1,0 @@
-def abstract      try1(/player, /command){
-    execute as /player run /command
-}
-
-def    Manifest(){
-    some implementations
-    some other implementations
-}

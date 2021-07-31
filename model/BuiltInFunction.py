@@ -1,7 +1,7 @@
 import os
 import json
 from math import sqrt
-
+from model.Memory import Memory
 from model.Exceptions import IncorrectArguments, NamespaceError
 from model.General import assertExistNamespace
 
@@ -40,26 +40,37 @@ def Manifest(interpreter, name, formatNum, description):
 BuiltInFunctionsDict["Manifest"] = Manifest
 
 def setCurrentNamespace(interpreter,namespace):
-    #namespace  and namespace path creation
     interpreter.memory.currentNamespace = namespace
-    os.mkdir(interpreter.memory.getCurrentNamespacePath())
+    if namespace in interpreter.memory.namespaces:
+        pass
+    else:
+        #remember this namespace
+        interpreter.memory.namespaces.append(namespace)
 
-    #subdirectories creation
-    os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/recipes")
-    os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/functions")
-    os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/item_modifiers")
+        #namespace  and namespace path creation
+        os.mkdir(interpreter.memory.getCurrentNamespacePath())
 
-    #add on load and tick function for this namespace
-    with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/load.json", 'r') as infile:
-        loadData = json.loads(infile.read())
-        loadData["values"].append(namespace + ":load")
-    with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/load.json", 'w') as outfile:
-        json.dump(loadData, outfile, indent=INDENT)
-    with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/tick.json", 'r') as infile:
-        tickData = json.loads(infile.read())
-        tickData["values"].append(namespace + ":tick")
-    with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/tick.json", 'w') as outfile:
-        json.dump(tickData, outfile, indent=INDENT)
+        #subdirectories creation
+        os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/recipes")
+        os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/functions")
+        os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/item_modifiers")
+
+        #add on load and tick function for this namespace
+        with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/load.json", 'r') as infile:
+            loadData = json.loads(infile.read())
+            loadData["values"].append(namespace + ":load")
+        with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/load.json", 'w') as outfile:
+            json.dump(loadData, outfile, indent=INDENT)
+        with open(interpreter.memory.getCurrentNamespacePath() + "/functions/load.mcfunction", 'w') as outfile:
+            outfile.write("")
+
+        with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/tick.json", 'r') as infile:
+            tickData = json.loads(infile.read())
+            tickData["values"].append(namespace + ":tick")
+        with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/tick.json", 'w') as outfile:
+            json.dump(tickData, outfile, indent=INDENT)
+        with open(interpreter.memory.getCurrentNamespacePath() + "/functions/tick.mcfunction", 'w') as outfile:
+            outfile.write("")
 
 BuiltInFunctionsDict["namespace.set"] = setCurrentNamespace
 
@@ -142,3 +153,15 @@ def itemModifierCopyNBT(interpreter,name, sourceStorage,*loops):
     with open(interpreter.memory.getCurrentNamespacePath() + "/item_modifiers/" + name + ".json", 'w') as outfile:
         json.dump(modifier, outfile, indent=INDENT)
 BuiltInFunctionsDict["item.modifier.copyNBT"] = itemModifierCopyNBT
+
+def onLoad(interpreter, *commands):
+    with open(interpreter.memory.getCurrentNamespacePath() + "/functions/load.mcfunction", 'a') as outfile:
+        for x in commands:
+            outfile.write(x + "\n")
+BuiltInFunctionsDict["onLoad"] = onLoad
+
+def onTick(interpreter, *commands):
+    with open(interpreter.memory.getCurrentNamespacePath() + "/functions/load.mcfunction", 'a') as outfile:
+        for x in commands:
+            outfile.write(x + "\n")
+BuiltInFunctionsDict["onLoad"] = onTick

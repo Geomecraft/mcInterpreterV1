@@ -26,6 +26,9 @@ def setupInterpreter():
 def ManifestTest():
     interpreter = setupInterpreter()
     interpreter.interpret("ManifestTest")
+def NamespaceTest():
+    interpreter = setupInterpreter()
+    interpreter.interpret("NamespaceTest")
 def RecipeTest():
     interpreter = setupInterpreter()
     interpreter.interpret("RecipeTest")
@@ -35,6 +38,8 @@ def DefineNonAbstractFunctionsTest():
 
 #Actual impelmenting stuff, run with caution
 # ManifestTest()
-RecipeTest()
+# NamespaceTest()
+# RecipeTest()
+# LoadAndTickTest()
 # DefineNonAbstractFunctionsTest()
 

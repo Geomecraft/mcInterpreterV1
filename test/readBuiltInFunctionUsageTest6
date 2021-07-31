@@ -1,4 +1,0 @@
-Manifest(tryDataPack, 6, some random description)
-namespace.set(test)
-
-recipe.shapeless(cursed_iron_ingot, iron_ingot, 3)

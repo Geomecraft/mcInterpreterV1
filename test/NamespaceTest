@@ -1,0 +1,13 @@
+Manifest(NamespaceTest, 7, It is a namespace implement test)
+namespace.set(ns1)
+def try1(){
+
+}
+namespace.set(ns2)
+def try2(){
+
+}
+namespace.set(ns1)
+def try1again(){
+    some commands here
+}

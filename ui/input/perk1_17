@@ -14,9 +14,7 @@ def abstract link(function, waitTime){
 #-----------------------------------------------------#
 namespace.set(mutual_hunt)
 
-def load(){
-    scoreboard objectives add player dummy
-}
+onLoad(scoreboard objectives add player dummy)
 
 def store_player_position_into_storage(){
 #player 1
@@ -67,10 +65,10 @@ item.modifier.setNBT(compass_the_end, tag, "<{LodestoneDimension:"minecraft:the_
 namespace.set(perk)
 
 #basic set up
-def abstract basicPropertyScoreboardSetup(){
+def basic_property_score_setup(){
     scoreboard objectives add health health
 }
-def abstract perkScoresDeclare(){
+def scores_declare(){
 
     #Enhanced Resilience
     scoreboard objectives add en_re dummy
@@ -81,10 +79,7 @@ def abstract perkScoresDeclare(){
     #Fragmentation
     scoreboard objectives add frag dummy
 }
-def load(){
-    basicPropertyScoreboardSetup()
-    perkScoresDeclare()
-}
+onLoad(function perk:basic_property_score_setup, function perk:scores_declare)
 
 #actual perk
 def enhanced_resiliance_loop(){

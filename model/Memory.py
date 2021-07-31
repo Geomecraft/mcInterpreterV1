@@ -8,7 +8,7 @@ class Memory:
         self.constant = constant    #type dict
         self.dataPackName = ""    #type string
         self.currentNamespace = ""    #type string
+        self.namespaces = [] #type listof string
 
     def getCurrentNamespacePath(self):
         return self.dataPackName + "/data/" + self.currentNamespace
-
