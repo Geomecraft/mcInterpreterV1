@@ -17,6 +17,8 @@ class BuiltInFunction:
 INDENT = 4
 BuiltInFunctionsDict = {}
 
+#built in function helpers
+
 #Actual functions
 def Manifest(interpreter, name, formatNum, description):
     #pack folder and mcmeta
@@ -53,6 +55,7 @@ def setCurrentNamespace(interpreter,namespace):
         #subdirectories creation
         os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/recipes")
         os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/functions")
+        os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/predicates")
         os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/item_modifiers")
 
         #add on load and tick function for this namespace
@@ -161,7 +164,54 @@ def onLoad(interpreter, *commands):
 BuiltInFunctionsDict["onLoad"] = onLoad
 
 def onTick(interpreter, *commands):
-    with open(interpreter.memory.getCurrentNamespacePath() + "/functions/load.mcfunction", 'a') as outfile:
+    with open(interpreter.memory.getCurrentNamespacePath() + "/functions/tick.mcfunction", 'a') as outfile:
         for x in commands:
             outfile.write(x + "\n")
-BuiltInFunctionsDict["onLoad"] = onTick
+BuiltInFunctionsDict["onTick"] = onTick
+
+def onLandSnowball(interpreter, tag, *commands):
+    if not interpreter.memory.flags.onLandSnowball:
+        setCurrentNamespace(interpreter,"sys_0_snowball")
+        functionPath = interpreter.memory.getCurrentNamespacePath() + "/functions/"
+        with open(functionPath + "init.mcfunction", 'w') as outfile:
+            outfile.write("scoreboard objectives add visfix dummy\n"
+                          "scoreboard players set .-1 visfix -1\n"
+                          "scoreboard players set .global visfix 1")
+        with open(functionPath + "vis_fix.mcfunction", 'w') as outfile:
+            outfile.write("execute if score .global visfix matches -1 run data modify entity @s Air set value 0s\n"
+                          "execute if score .global visfix matches 1 run data modify entity @s Air set value 1s")
+        onLoad(interpreter, "function sys_0_snowball:init")
+        onTick(interpreter, "scoreboard players operation .global visfix *= .-1 visfix")
+
+    index = str(interpreter.memory.sysIndex)
+    setCurrentNamespace(interpreter,"sys_" + index + "_snowball")
+    functionPath = interpreter.memory.getCurrentNamespacePath() + "/functions/"
+    with open(functionPath + "found_ball.mcfunction", 'w') as outfile:
+        outfile.write("summon snowball ~ ~ ~ {Tags:[\"" + tag + "\",\"init\"],Passengers:[{id:\"minecraft:area_effect_cloud\",Age:-2147483648,Duration:-1,WaitTime:-2147483648,Tags:[\"sys_spitem_" + index + "\"]}]}\n"
+                      "data modify entity @e[type=snowball,tag=" + tag + ",tag=init,limit=1] Owner set from entity @s Owner\n"
+                      "data modify entity @e[type=snowball,tag=" + tag + ",tag=init,limit=1] Motion set from entity @s Motion\n"
+                      "tag @e[type=snowball,tag=" + tag + ",tag=init,limit=1] remove init\n"
+                      "kill @s")
+    with open(functionPath + "landed.mcfunction",'w') as outfile:
+        outfile.write("kill @s\n")
+    with open(functionPath + "landed.mcfunction",'a') as outfile:
+        for x in commands:
+            outfile.write(x + "\n")
+    with open(functionPath + "main.mcfunction",'w') as outfile:
+        outfile.write("execute as @e[type=snowball,tag=!" + tag + ",nbt={Item:{tag:{" + tag + ":1b}}}] at @s run function " + interpreter.memory.currentNamespace + ":found_ball\n"
+                      "execute as @e[type=area_effect_cloud,tag=sys_spitem_" + index + "] unless predicate "+ interpreter.memory.currentNamespace + ":is_riding_snowball at @s run function " + interpreter.memory.currentNamespace + ":landed\n"
+                      "execute as @e[type=snowball,tag=" + tag + "] run function sys_0_snowball:vis_fix\n")
+    onTick(interpreter, "function " + interpreter.memory.currentNamespace + ":main")
+    with open(interpreter.memory.getCurrentNamespacePath() + "/predicates/" + "is_riding_snowball.json",'w') as outfile:
+        data = {"condition": "minecraft:entity_properties",
+                "entity": "this",
+                "predicate": {
+                    "vehicle": {
+                        "type": "minecraft:snowball",
+                        "nbt": "{Tags:[\""+ tag +"\"]}"
+                    }
+                }}
+        json.dump(data, outfile, indent=INDENT)
+    interpreter.memory.sysIndex += 1
+    interpreter.memory.flags.onLandSnowball = True
+BuiltInFunctionsDict["onLand"] = onLandSnowball

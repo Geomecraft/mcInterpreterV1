@@ -11,7 +11,7 @@ def abstract link(function, waitTime){
     schedule function <function> <waitTime>
 }
 
-#-----------------------------------------------------#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~mutual_hunt~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 namespace.set(mutual_hunt)
 
 onLoad(scoreboard objectives add player dummy)
@@ -60,11 +60,11 @@ item.modifier.setNBT(compass_the_nether, tag, "<{LodestoneDimension:"minecraft:t
 item.modifier.setNBT(compass_the_end, tag, "<{LodestoneDimension:"minecraft:the_end"}>")
 
 
-
-#-----------------------------------------------------#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~mutual_hunt~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~perk~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#-----basic set up-----#
 namespace.set(perk)
 
-#basic set up
 def basic_property_score_setup(){
     scoreboard objectives add health health
 }
@@ -80,8 +80,8 @@ def scores_declare(){
     scoreboard objectives add frag dummy
 }
 onLoad(function perk:basic_property_score_setup, function perk:scores_declare)
-
-#actual perk
+#-----basic set up-----#
+#-----actual perk-----#
 def enhanced_resiliance_loop(){
     forPerk(en_re, execute if score @s health matches 10.. run effect give @s resistance >EFFECT_DEFAULT_LENGTH< 0 true)
     forPerk(en_re, execute if score @s health matches ..10 run effect give @s resistance >EFFECT_DEFAULT_LENGTH< 1 true)
@@ -91,8 +91,10 @@ def enhanced_resiliance(){
     function perk:enhanced_resiliance_loop
 }
 
+def 
+#-----actual perk-----#
+#-----starting function-----#
 #starting function
-
 def start(){
     #compass tracking
     function mutual_hunt:store_player_position_into_storage
@@ -102,3 +104,9 @@ def start(){
     #perk
     function perk:enhanced_resiliance
 }
+#-----starting function-----#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~perk~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+onLand(spball, setblock ~ ~ ~ stone)
+onLand(smite, summon minecraft:lightning_bolt ~ ~ ~)
+onLand(dead, say Im dead)

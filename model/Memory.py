@@ -9,6 +9,12 @@ class Memory:
         self.dataPackName = ""    #type string
         self.currentNamespace = ""    #type string
         self.namespaces = [] #type listof string
+        self.sysIndex = 1 #start at 1, sys 0 is for the global sys
+        self.flags = Flags()
 
     def getCurrentNamespacePath(self):
         return self.dataPackName + "/data/" + self.currentNamespace
+
+class Flags:
+    def __init__(self):
+        self.onLandSnowball = False
