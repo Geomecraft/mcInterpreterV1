@@ -1,9 +1,9 @@
 import os
 import json
 from math import sqrt
-from model.Memory import Memory
-from model.Exceptions import IncorrectArguments, NamespaceError
-from model.General import assertExistNamespace
+
+from model.General import assertExistNamespace, stripEachItem, parseFunctionUsage
+from model.Syntax import FUNCTION_USAGE_SYNTAX
 
 
 class BuiltInFunction:
@@ -15,7 +15,8 @@ class BuiltInFunction:
 # path = os.getcwd()
 # print("Current working directory is " + '\033[94m' + path + '\033[0m')
 INDENT = 4
-BuiltInFunctionsDict = {}
+GlobalBuiltInFunctionsDict = {}
+LocalBuiltInFunctionsDict = {}
 
 #built in function helpers
 
@@ -39,7 +40,7 @@ def Manifest(interpreter, name, formatNum, description):
         json.dump({"values":[]}, outfile, indent=INDENT)
 
     return "Datapack Manifestation Succesful"
-BuiltInFunctionsDict["Manifest"] = Manifest
+GlobalBuiltInFunctionsDict["Manifest"] = Manifest
 
 def setCurrentNamespace(interpreter,namespace):
     interpreter.memory.currentNamespace = namespace
@@ -75,7 +76,7 @@ def setCurrentNamespace(interpreter,namespace):
         with open(interpreter.memory.getCurrentNamespacePath() + "/functions/tick.mcfunction", 'w') as outfile:
             outfile.write("")
 
-BuiltInFunctionsDict["namespace.set"] = setCurrentNamespace
+GlobalBuiltInFunctionsDict["namespace.set"] = setCurrentNamespace
 
 def recipeCraftingShaped(interpreter,*loa):
     assertExistNamespace(interpreter.memory)
@@ -107,7 +108,7 @@ def recipeCraftingShaped(interpreter,*loa):
 
     with open(interpreter.memory.getCurrentNamespacePath() + "/recipes/" + loa[0] + ".json", 'w') as outfile:
         json.dump(data, outfile, indent=INDENT)
-BuiltInFunctionsDict["recipe.shaped"] = recipeCraftingShaped
+GlobalBuiltInFunctionsDict["recipe.shaped"] = recipeCraftingShaped
 
 def recipeCraftingShapeless(interpreter,*loa):
     assertExistNamespace(interpreter.memory)
@@ -125,14 +126,14 @@ def recipeCraftingShapeless(interpreter,*loa):
 
     with open(interpreter.memory.getCurrentNamespacePath() + "/recipes/" + loa[0] + ".json", 'w') as outfile:
         json.dump(data, outfile, indent=INDENT)
-BuiltInFunctionsDict["recipe.shapeless"] = recipeCraftingShapeless
+GlobalBuiltInFunctionsDict["recipe.shapeless"] = recipeCraftingShapeless
 
 def itemModifierSetNBT(interpreter, name, target, value):
     modifier = {"function":"minecraft:set_nbt",
                 target:value}
     with open(interpreter.memory.getCurrentNamespacePath() + "/item_modifiers/" + name + ".json", 'w') as outfile:
         json.dump(modifier, outfile, indent=INDENT)
-BuiltInFunctionsDict["item.modifier.setNBT"] = itemModifierSetNBT
+GlobalBuiltInFunctionsDict["item.modifier.setNBT"] = itemModifierSetNBT
 
 #op, sourcePath, targetPath
 
@@ -155,21 +156,22 @@ def itemModifierCopyNBT(interpreter,name, sourceStorage,*loops):
                 }
     with open(interpreter.memory.getCurrentNamespacePath() + "/item_modifiers/" + name + ".json", 'w') as outfile:
         json.dump(modifier, outfile, indent=INDENT)
-BuiltInFunctionsDict["item.modifier.copyNBT"] = itemModifierCopyNBT
+GlobalBuiltInFunctionsDict["item.modifier.copyNBT"] = itemModifierCopyNBT
 
 def onLoad(interpreter, *commands):
     with open(interpreter.memory.getCurrentNamespacePath() + "/functions/load.mcfunction", 'a') as outfile:
         for x in commands:
             outfile.write(x + "\n")
-BuiltInFunctionsDict["onLoad"] = onLoad
+GlobalBuiltInFunctionsDict["onLoad"] = onLoad
 
 def onTick(interpreter, *commands):
     with open(interpreter.memory.getCurrentNamespacePath() + "/functions/tick.mcfunction", 'a') as outfile:
         for x in commands:
             outfile.write(x + "\n")
-BuiltInFunctionsDict["onTick"] = onTick
+GlobalBuiltInFunctionsDict["onTick"] = onTick
 
 def onLandSnowball(interpreter, tag, *commands):
+    originalNamespace = interpreter.memory.currentNamespace
     if not interpreter.memory.flags.onLandSnowball:
         setCurrentNamespace(interpreter,"sys_0_snowball")
         functionPath = interpreter.memory.getCurrentNamespacePath() + "/functions/"
@@ -214,4 +216,21 @@ def onLandSnowball(interpreter, tag, *commands):
         json.dump(data, outfile, indent=INDENT)
     interpreter.memory.sysIndex += 1
     interpreter.memory.flags.onLandSnowball = True
-BuiltInFunctionsDict["onLand"] = onLandSnowball
+    setCurrentNamespace(interpreter,originalNamespace)
+GlobalBuiltInFunctionsDict["onLand"] = onLandSnowball
+
+def forEach(interpreter, fn, var, collection, abstractBody):
+    collectionlst = collection[1:-1].split(",")
+    stripEachItem(collectionlst)
+    if FUNCTION_USAGE_SYNTAX.fullmatch(abstractBody): #abstract function
+        fnName = parseFunctionUsage(abstractBody)[0]
+        fnlop = parseFunctionUsage(abstractBody)[1]
+        for x in collectionlst:
+            for i in range(0,len(fnlop)): #substitue collection item in place of var
+                if fnlop[i] == var:
+                    fnlop[i] = x
+            fn.definition += interpreter.memory.function[fnName].useAbstractFn(fnlop) #use abstract function
+    else: #abstract command
+        for x in collectionlst:
+            fn.definition.append(abstractBody.replace("<" + var + ">", x))
+LocalBuiltInFunctionsDict["for.each"] = forEach

@@ -12,6 +12,7 @@ def abstract holy_smite_with_selfRegen(entity, smiteEntityType, duration, level)
 }
 
 def holy_smitelv1(){
+    item.modifier.copyNBT(test_modifier, minecraft:smite, s, m, replace)
     holy_smite_with_selfRegen(@a, zombie, 1, 0)
 }
 

@@ -5,18 +5,16 @@ import re
 from model import BuiltInFunction
 from model.DebugLog import DebugElementInfo, DebugElementMemory, DebugLog
 from model.Exceptions import AbstractionError, IncorrectArguments, SyntaxError, NullError
-from model.General import stripEachItem, readFunctionUsage, assertExistNamespace
+from model.General import stripEachItem, parseFunctionUsage, assertExistNamespace
+from model.Syntax import CONSTANT_DEFINITION_SYNTAX, FUNCTION_USAGE_SYNTAX, FUNCTION_DEFINITION_SYNTAX
 from model.UserFunction import UserFunction
 from model.Memory import Memory
 from model.Options import Options
 
 #CONSTANTS
-BUILT_IN_FN = BuiltInFunction.BuiltInFunctionsDict
+BUILT_IN_FN = BuiltInFunction.GlobalBuiltInFunctionsDict
 
 class Interpreter:
-    CONSTANT_DEFINITION_SYNTAX = re.compile(r".+=.+")
-    FUNCTION_DEFINITION_SYNTAX = re.compile(r"def\s+(abstract\s+)?(\S)+\(.*\)\s*{")
-    FUNCTION_USAGE_SYNTAX = re.compile(r"(\S)+\(.*")
 
     def __init__(self, content = None, memory=None, currentLineNumber=1, maximumLineNumber = None, currentLineString = "", options=None, debugLog=None):
         if memory is None:
@@ -63,13 +61,13 @@ class Interpreter:
             return self.currentLine[0] == "#"
 
     def isConstantDefinition(self):
-        return self.CONSTANT_DEFINITION_SYNTAX.fullmatch(self.currentLine)
+        return CONSTANT_DEFINITION_SYNTAX.fullmatch(self.currentLine)
 
     def isFunctionDefinition(self):
-        return self.FUNCTION_DEFINITION_SYNTAX.fullmatch(self.currentLine)
+        return FUNCTION_DEFINITION_SYNTAX.fullmatch(self.currentLine)
 
     def isFunctionUsage(self):
-        return self.FUNCTION_USAGE_SYNTAX.fullmatch(self.currentLine)
+        return FUNCTION_USAGE_SYNTAX.fullmatch(self.currentLine)
 
 
 
@@ -81,8 +79,6 @@ class Interpreter:
     def interpretAsConstantDefinition(self):
         name = self.currentLine.split("=")[0].strip()
         value = self.currentLine.split("=")[1].strip()
-        if (value[0] == "\"" and value[-1] == "\""):
-            value = value[1:-1]
         self.memory.constant[name] = value
         for i in range(self.currentLineNumber, self.maximumLineNumber):
             self.content[i] = self.content[i].replace(">" + name + "<", value)
@@ -105,8 +101,8 @@ class Interpreter:
     #EFFECTS: it is a build in function, execute the function.
     def interpretAsFunctionUsage(self):
         fnstr = self.currentLine
-        fnName = readFunctionUsage(fnstr)[0]
-        fnlop = readFunctionUsage(fnstr)[1]
+        fnName = parseFunctionUsage(fnstr)[0]
+        fnlop = parseFunctionUsage(fnstr)[1]
         if fnName not in BUILT_IN_FN.keys():
             raise NullError(self.exceptionLineMsg() + "function not found in any built-in library")
         else:

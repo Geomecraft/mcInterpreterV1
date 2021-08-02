@@ -1,4 +1,6 @@
-from model.General import stripEachItem, readFunctionUsage
+from model.General import stripEachItem, parseFunctionUsage
+from model.BuiltInFunction import GlobalBuiltInFunctionsDict, LocalBuiltInFunctionsDict
+from model.Syntax import FUNCTION_USAGE_SYNTAX
 
 
 class UserFunction:
@@ -51,17 +53,23 @@ class UserFunction:
         stripEachItem(parameters)
 
         definition = []
+        thisfn = cls(name, parameters, definition, abstraction)
+
         if len(los) > 1:
             for i in range(1,len(los)):
-                if interpreter.FUNCTION_USAGE_SYNTAX.fullmatch(los[i]): #is a function call (required to be non-built in function)
-                    fnName = readFunctionUsage(los[i])[0]
-                    fnlop = readFunctionUsage(los[i])[1]
-                    stripEachItem(fnlop)
-                    definition += interpreter.memory.function[fnName].useAbstractFn(fnlop)
+                if FUNCTION_USAGE_SYNTAX.fullmatch(los[i]) and los[i][0] != "#": #is a function call, and if it is commented out just add that whatever onto body anyways since it wont run
+                    fnName = parseFunctionUsage(los[i])[0]
+                    fnlop = parseFunctionUsage(los[i])[1]
+                    if fnName in GlobalBuiltInFunctionsDict.keys():
+                        GlobalBuiltInFunctionsDict[fnName](interpreter, *fnlop)
+                    elif fnName in LocalBuiltInFunctionsDict.keys():
+                        LocalBuiltInFunctionsDict[fnName](interpreter, thisfn, *fnlop)
+                    else:
+                        thisfn.definition += interpreter.memory.function[fnName].useAbstractFn(fnlop)
                 else:
-                    definition.append(los[i])
+                    thisfn.definition.append(los[i])
 
-        return cls(name,parameters,definition,abstraction)
+        return thisfn
 
     def useAbstractFn(self, lop):
         if not self.parameters:

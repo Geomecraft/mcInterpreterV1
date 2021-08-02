@@ -32,14 +32,14 @@ def NamespaceTest():
 def RecipeTest():
     interpreter = setupInterpreter()
     interpreter.interpret("RecipeTest")
-def DefineNonAbstractFunctionsTest():
+def DefineUserFunctionsTest():
     interpreter = setupInterpreter()
-    interpreter.interpret("DefineNonAbstractFunctionsTest")
+    interpreter.interpret("DefineUserFunctionsTest")
 
 #Actual impelmenting stuff, run with caution
 # ManifestTest()
 # NamespaceTest()
 # RecipeTest()
 # LoadAndTickTest()
-# DefineNonAbstractFunctionsTest()
+DefineUserFunctionsTest()
 
