@@ -235,13 +235,18 @@ def forEach(interpreter, fn, var, collection, abstractBody):
             fn.definition.append(abstractBody.replace("<" + var + ">", x))
 LocalBuiltInFunctionsDict["for.each"] = forEach
 
-#TODO
-# loop(num, interval) function, where the function loop additional |num| times every |interval| time after it's execution,
-# if |num| is 0, it executes infinite number of times. If loop is called with no arguments, it is default to infinite loop with 1t interval.
+def loop(interpreter, fn, num = "0", interval = "1t", preserve = None):
+    #TODO add functionality for looping certain amount of times
+    waitThenExecuteFunction(interpreter, fn, interval, fn.namespace + ":" + fn.name, preserve)
+LocalBuiltInFunctionsDict["loop"] = loop
 
-#TODO
-# break(mcFunction, executeClause) function, where it makes the loop/schedule of |mcFunction| stop if the condition of the execute clause is met
+def breakMcFunction(interpreter, fn, mcFunction, executeClause = ""):
+    if executeClause[-3:] != "run" and executeClause != "":
+        executeClause += " run "
+    fn.definition.append(executeClause + "schedule clear " + mcFunction)
+LocalBuiltInFunctionsDict["break"] = breakMcFunction
 
-#TODO
-# wait(mcFunction, waitTime, preserve) function, where it executes the function |mcFunction| after |waitTime| time and preserve |preserve| property of the executer,
-# so far only position is possible to keep
+def waitThenExecuteFunction(interpreter, fn, waitTime, mcFunction, preserve = None):
+    #TODO add functionality for preserver position
+    fn.definition.append("schedule function " + mcFunction + " " + waitTime + " append")
+LocalBuiltInFunctionsDict["wait"] = waitThenExecuteFunction

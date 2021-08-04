@@ -5,7 +5,7 @@ from model.Syntax import FUNCTION_USAGE_SYNTAX
 
 class UserFunction:
 
-    def __init__(self, name = "", parameters=None, definition=None, abstraction = None):
+    def __init__(self, name = "", parameters=None, definition=None, abstraction = None, namespace = ""):
         # class invariants:
         # - If a function is a definition, body and arguments are None
         # - If a function is not a definition (its a usage), abstraction, parameters and body are None
@@ -17,6 +17,7 @@ class UserFunction:
         self.parameters = parameters  # list of string that represents each parameter's name
         self.definition = definition  # list of string that each line represents a line of command, that may have a parameter waiting to be substituted. The parameter waiting to be subtituted must be wrapped in "/" at begining and end
         self.abstraction = abstraction  # bool
+        self.namespace = namespace
 
     def __str__(self):
         if self.abstraction:
@@ -48,12 +49,13 @@ class UserFunction:
             abstraction = False
 
         name = definitionClause.split("(")[0]
+        namespace = interpreter.memory.currentNamespace
 
         parameters = definitionClause.split("(")[1][:-1].split(",")
         stripEachItem(parameters)
 
         definition = []
-        thisfn = cls(name, parameters, definition, abstraction)
+        thisfn = cls(name, parameters, definition, abstraction, namespace)
 
         if len(los) > 1:
             for i in range(1,len(los)):

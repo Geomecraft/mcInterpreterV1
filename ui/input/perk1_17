@@ -91,8 +91,12 @@ def enhanced_resiliance_loop(){
     link(perk:enhanced_resiliance_loop, 1t)
 }
 
+onLand(holy_smite, function perk:first_smite)
 def holy_smite(){
-    onLand(smite, function perk:first_smite)
+    wait(28s, perk:holy_smite_loop)
+}
+def holy_smite_loop(){
+    forPerk(ho_sm, give @s snowball{holy_smite:1b})
 }
 def first_smite(){
     summon minecraft:lightning_bolt ~ ~ ~
@@ -105,9 +109,6 @@ def second_smite(){
 }
 def third_smite(){
     for.each(x, >UNDEAD<, "<execute as @e[type=minecraft:area_effect_cloud, tag=holy_smite, nbt={Age:21}] at @s run execute at @e[type=<x>,distance=..5] run summon lightning_bolt ~ ~ ~>")
-}
-def smite_testhelper(){
-    for.each(x, >UNDEAD<, ""
 }
 
 #-----actual perk-----#

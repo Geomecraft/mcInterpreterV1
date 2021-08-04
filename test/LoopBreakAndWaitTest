@@ -1,0 +1,41 @@
+Manifest(loop break and wait test, 7, just for testing )
+namespace.set(test)
+
+#default loop parameter
+def looping_function(){
+    say looping!
+    loop()
+}
+#break a default looping function with no condition
+def break_looping(){
+    break(test:looping_function)
+    say broke loop!
+}
+
+#try looping to increase a clock, then interrupting it when reaching certain condition
+def declare_scores(){
+    scoreboard objectives add timer_in_seconds dummy
+    scoreboard players set .global timer_in_seconds 0
+    scoreboard objectives setdisplay sidebar timer_in_seconds
+}
+onLoad(function test:declare_scores)
+def looping_seconds(){
+    scoreboard players add .global timer_in_seconds 1
+    say seconds +1
+    loop(0, 1s)
+}
+def break_timer_and_reset(){
+    break(test:looping_seconds, execute if score .global timer_in_seconds matches 5)
+    execute if score .global timer_in_seconds matches 5 run scoreboard players set .global timer_in_seconds 0
+}
+onTick(function test:break_timer_and_reset)
+
+#wait
+def wait_then_run(){
+    wait(3s, test:running)
+}
+def running(){
+    say 3 seconds has passed
+}
+
+

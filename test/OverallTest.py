@@ -1,3 +1,4 @@
+from model.General import clearDirectory
 from model.Interpreter import Interpreter
 import os
 
@@ -18,6 +19,7 @@ def assertException(testPath, exceptionMessage):
 
 
 #before
+clearDirectory("output")
 def setupInterpreter():
     interpreter = Interpreter()
     interpreter.options.datapackOutputPath = "output"
@@ -38,11 +40,15 @@ def DefineUserFunctionsTest():
 def ConstantsTest():
     interpreter = setupInterpreter()
     interpreter.interpret("ConstantsTest")
+def LoopBreakAndWaitTest():
+    interpreter = setupInterpreter()
+    interpreter.interpret("LoopBreakAndWaitTest")
 #Actual impelmenting stuff, run with caution
 # ManifestTest()
 # NamespaceTest()
 # RecipeTest()
 # LoadAndTickTest()
 # DefineUserFunctionsTest()
-ConstantsTest()
+# ConstantsTest()
+LoopBreakAndWaitTest()
 
