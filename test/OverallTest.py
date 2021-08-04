@@ -35,11 +35,14 @@ def RecipeTest():
 def DefineUserFunctionsTest():
     interpreter = setupInterpreter()
     interpreter.interpret("DefineUserFunctionsTest")
-
+def ConstantsTest():
+    interpreter = setupInterpreter()
+    interpreter.interpret("ConstantsTest")
 #Actual impelmenting stuff, run with caution
 # ManifestTest()
 # NamespaceTest()
 # RecipeTest()
 # LoadAndTickTest()
-DefineUserFunctionsTest()
+# DefineUserFunctionsTest()
+ConstantsTest()
 

@@ -1,0 +1,46 @@
+Manifest(constant test, 7, just for testing constants smart replacement)
+namespace.set(test)
+
+NORMAL_INT = 3
+NORMAL_INT_2 = 18
+NORMAL_STRING = this test hopefully pass
+NORMAL_NBT = {display:{Name:'{"text":"Very good egg"}'},Enchantments:[{id:"minecraft:sharpness",lvl:5s}]}
+NORMAL_NBT_1 = {LodestoneDimension:"minecraft:overworld",LodestoneTracked:0b,LodestonePos:{X:1,Y:1,Z:1}}
+NORMAL_LIST = [1,2,3,4,5,6,7]
+NORMAL_LIST_2 = [snowball, egg, dirt, stone]
+LIST_OF_NBT = [{LodestoneDimension:"minecraft:overworld",LodestoneTracked:0b,LodestonePos:{X:1,Y:1,Z:1}}, {LodestoneDimension:"minecraft:the_nether",LodestoneTracked:0b,LodestonePos:{X:1,Y:1,Z:1}}, {LodestoneDimension:"minecraft:the_end",LodestoneTracked:0b,LodestonePos:{X:1,Y:1,Z:1}}]
+
+#simple substitution in function bodies
+def give_3_tnt(){
+    give @s tnt >NORMAL_INT<
+}
+def abstract give_stone(count){
+    give @s stone <count>
+}
+def give_3_tnt_and_18_stone(){
+    give @s tnt >NORMAL_INT<
+    give_stone(>NORMAL_INT_2<)
+}
+
+#nbt substitution in function bodies and calls
+def abstract display(string){
+    say <string>
+}
+def display_nbt_twice(){
+    display(>NORMAL_NBT<)
+    say >NORMAL_NBT<
+}
+item.modifier.setNBT(compass_setup, tag, >NORMAL_NBT_1<)
+
+#list substitution in function bodies and calls
+def abstract display_list(list){
+    say <list>
+}
+def display_list_twice(){
+    display_list(>NORMAL_LIST<)
+    say >NORMAL_LIST<
+}
+def give_each(){
+    for.each(x, >NORMAL_LIST_2<, give @s <x>)
+}
+

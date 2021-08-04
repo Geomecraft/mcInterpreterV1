@@ -49,3 +49,16 @@
 #
 #     return fnName, fnlop
 #
+import re
+
+name = "NORMAL_NBT_1"
+value = "{display:{Name:\'{\"text\":\"Very good egg\"}\'},Enchantments:[{id:\"minecraft:sharpness\",lvl:5s}]})"
+tx = "display(>NORMAL_NBT<)"
+# print(re.sub(r"[(,]>" + name + "<[(,]", "\"<" + value + ">\"", tx))
+# print(re.sub(r"[(,]1[),]", "\"<" + "sub" + ">\"", "(1)"))
+
+
+whole = "item.modifier.setNBT(compass_setup, tag, >NORMAL_NBT_1<)"
+matchObject = re.search(r"([(,]\s*>" + name + "<\s*[),])", whole)
+new = whole[:matchObject.start()] + whole[matchObject.start():matchObject.end()].replace(">" + name + "<", "\"<" + value + ">\"") + whole[matchObject.end():]
+print(new)

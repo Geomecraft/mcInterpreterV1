@@ -10,7 +10,7 @@ def setCurrentLineTest():
     interpreter = Interpreter()
     interpreter.setContent("setCurrentLineTestFile")
     interpreter.setCurrentLine()
-    assert(interpreter.currentLine == "some content")
+    assert(interpreter.getCurrentLine() == "some content")
 setCurrentLineTest()
 
 def isFunctionDefinitionTest():

@@ -5,7 +5,7 @@ from model.Syntax import FUNCTION_USAGE_SYNTAX
 
 class UserFunction:
 
-    def __init__(self, name="", parameters=None, definition=None, abstraction = None):
+    def __init__(self, name = "", parameters=None, definition=None, abstraction = None):
         # class invariants:
         # - If a function is a definition, body and arguments are None
         # - If a function is not a definition (its a usage), abstraction, parameters and body are None

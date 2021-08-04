@@ -234,3 +234,14 @@ def forEach(interpreter, fn, var, collection, abstractBody):
         for x in collectionlst:
             fn.definition.append(abstractBody.replace("<" + var + ">", x))
 LocalBuiltInFunctionsDict["for.each"] = forEach
+
+#TODO
+# loop(num, interval) function, where the function loop additional |num| times every |interval| time after it's execution,
+# if |num| is 0, it executes infinite number of times. If loop is called with no arguments, it is default to infinite loop with 1t interval.
+
+#TODO
+# break(mcFunction, executeClause) function, where it makes the loop/schedule of |mcFunction| stop if the condition of the execute clause is met
+
+#TODO
+# wait(mcFunction, waitTime, preserve) function, where it executes the function |mcFunction| after |waitTime| time and preserve |preserve| property of the executer,
+# so far only position is possible to keep

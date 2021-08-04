@@ -2,7 +2,7 @@ Manifest(perk for 1_17 manhunt, 7, by ItsGeomecraft)
 
 #CONSTANTS
 EFFECT_DEFAULT_LENGTH = 3
-UNDEAD = "<[zombie, skeleton]>"
+UNDEAD = [zombie, skeleton,zombified_piglin]
 
 #some general purpose abstraction functions
 def abstract forPerk(perkScore, runnable){
@@ -90,15 +90,24 @@ def enhanced_resiliance_loop(){
     forPerk(en_re, execute if score @s health matches ..10 run effect give @s resistance >EFFECT_DEFAULT_LENGTH< 1 true)
     link(perk:enhanced_resiliance_loop, 1t)
 }
+
 def holy_smite(){
-    onLand(smite, function first_smite, function additional_smite)
+    onLand(smite, function perk:first_smite)
 }
 def first_smite(){
     summon minecraft:lightning_bolt ~ ~ ~
-    summon area_effect_cloud ~ ~ ~ {Duration:1000,Tags:["holy_smite"]}
+    summon area_effect_cloud ~ ~ ~ {Duration:23,Tags:["holy_smite"]}
+    schedule function perk:second_smite 11t append
 }
-def additional_smite(){
-    for.each(x, >UNDEAD<, "<execute as @e[type=minecraft:area_effect_cloud, tag=holy_smite] at @s run execute at @e[type=<x>,distance=..2]>")
+def second_smite(){
+    for.each(x, >UNDEAD<, "<execute as @e[type=minecraft:area_effect_cloud, tag=holy_smite, nbt={Age:10}] at @s run execute at @e[type=<x>,distance=..5] run summon lightning_bolt ~ ~ ~>")
+    schedule function perk:third_smite 11t append
+}
+def third_smite(){
+    for.each(x, >UNDEAD<, "<execute as @e[type=minecraft:area_effect_cloud, tag=holy_smite, nbt={Age:21}] at @s run execute at @e[type=<x>,distance=..5] run summon lightning_bolt ~ ~ ~>")
+}
+def smite_testhelper(){
+    for.each(x, >UNDEAD<, ""
 }
 
 #-----actual perk-----#
