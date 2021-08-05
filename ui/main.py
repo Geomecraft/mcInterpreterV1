@@ -14,3 +14,4 @@ with open("input/option.json","r") as infile:
     interpreter.options.datapackOutputPath = options["outputPath"]
     interpreter.options.datapackInputPath = options["inputPath"]
     interpreter.interpret("/" + options["main"])
+    print(interpreter.memory.function)

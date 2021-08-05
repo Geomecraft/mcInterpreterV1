@@ -40,6 +40,9 @@ def parseFunctionUsage(fnstr):
         if fnlop[i][0:2] == "\"<" and fnlop[i][-2:] == ">\"":
             fnlop[i] = fnlop[i][2:-2]
 
+    #if no fnlop
+    if fnlop == [""]:
+        fnlop = []
     return fnName, fnlop
 
 def assertExistNamespace(memory):

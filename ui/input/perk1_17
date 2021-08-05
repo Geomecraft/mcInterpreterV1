@@ -64,22 +64,21 @@ item.modifier.setNBT(compass_the_end, tag, "<{LodestoneDimension:"minecraft:the_
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~mutual_hunt~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~perk~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #-----basic set up-----#
+#PERK CONSTANTS
+PERK_SCORE = [en_re, ho_sm, frag]
+HELPER_PERK_SCORE = [ho_sm_count]
+
 namespace.set(perk)
 def basic_property_score_setup(){
     scoreboard objectives add health health
 }
 def scores_declare(){
-
-    #Enhanced Resilience
-    scoreboard objectives add en_re dummy
-
-    #Holy Smite
-    scoreboard objectives add ho_sm dummy
-
-    #Fragmentation
-    scoreboard objectives add frag dummy
+    for.each(x, >PERK_SCORE<, scoreboard objectives add <x> dummy)
 }
-onLoad(function perk:basic_property_score_setup, function perk:scores_declare)
+def helper_score_declare(){
+    for.each(x, >HELPER_PERK_SCORE<, scoreboard objectives add <x> dummy)
+}
+onLoad(function perk:basic_property_score_setup, function perk:scores_declare, function perk:helper_score_declare)
 #-----basic set up-----#
 #-----actual perk-----#
 def enhanced_resiliance(){
@@ -91,13 +90,20 @@ def enhanced_resiliance_loop(){
     link(perk:enhanced_resiliance_loop, 1t)
 }
 
-onLand(holy_smite, function perk:first_smite)
 def holy_smite(){
+    function perk:holy_smite_limit_maximum
     wait(28s, perk:holy_smite_loop)
 }
 def holy_smite_loop(){
     forPerk(ho_sm, give @s snowball{holy_smite:1b})
+    loop(0, 28s)
 }
+def holy_smite_limit_maximum(){
+    forPerk(ho_sm, execute store result score @s ho_sm_count run clear @s minecraft:snowball{holy_smite:1b} 0)
+    forPerk(ho_sm, execute if score @s ho_sm_count matches 4.. run clear @s minecraft:snowball{holy_smite:1b} 1)
+    loop()
+}
+onLand(holy_smite, function perk:first_smite)
 def first_smite(){
     summon minecraft:lightning_bolt ~ ~ ~
     summon area_effect_cloud ~ ~ ~ {Duration:23,Tags:["holy_smite"]}
@@ -111,10 +117,20 @@ def third_smite(){
     for.each(x, >UNDEAD<, "<execute as @e[type=minecraft:area_effect_cloud, tag=holy_smite, nbt={Age:21}] at @s run execute at @e[type=<x>,distance=..5] run summon lightning_bolt ~ ~ ~>")
 }
 
+def fragmentation(){
+    function perk:fragmentation_loop()
+}
+def fragmentation_loop(){
+    forPerk(ho_sm, give @s tnt)
+    loop(0, 32s)
+}
+
 #-----actual perk-----#
 #-----starting function-----#
-#starting function
+#main function
 def start(){
+    function perk:stop
+
     #compass tracking
     function mutual_hunt:store_player_position_into_storage
     function mutual_hunt:compass_update
@@ -122,6 +138,13 @@ def start(){
 
     #perk
     function perk:enhanced_resiliance
+    function perk:holy_smite
+    function perk:fragmentation
+}
+# TODO
+# score.clear
+def stop(){
+    break.all()
 }
 #-----starting function-----#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~perk~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

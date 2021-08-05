@@ -30,6 +30,13 @@ def break_timer_and_reset(){
 }
 onTick(function test:break_timer_and_reset)
 
+#The same thing as last section, except it's the function's own executeIfClause checking the condition
+def looping_seconds_self_check(){
+    scoreboard players add .global timer_in_seconds 1
+    say seconds +1
+    loop(0, 1s, execute if score .global timer_in_seconds matches ..5)
+}
+
 #wait
 def wait_then_run(){
     wait(3s, test:running)

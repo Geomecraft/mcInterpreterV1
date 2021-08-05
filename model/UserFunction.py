@@ -49,13 +49,14 @@ class UserFunction:
             abstraction = False
 
         name = definitionClause.split("(")[0]
-        namespace = interpreter.memory.currentNamespace
+        if not abstraction:
+            name = interpreter.memory.currentNamespace + ":" + name
 
         parameters = definitionClause.split("(")[1][:-1].split(",")
         stripEachItem(parameters)
 
         definition = []
-        thisfn = cls(name, parameters, definition, abstraction, namespace)
+        thisfn = cls(name, parameters, definition, abstraction)
 
         if len(los) > 1:
             for i in range(1,len(los)):

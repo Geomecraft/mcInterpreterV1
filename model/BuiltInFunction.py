@@ -235,18 +235,26 @@ def forEach(interpreter, fn, var, collection, abstractBody):
             fn.definition.append(abstractBody.replace("<" + var + ">", x))
 LocalBuiltInFunctionsDict["for.each"] = forEach
 
-def loop(interpreter, fn, num = "0", interval = "1t", preserve = None):
+def loop(interpreter, fn, num = "0", interval = "1t", executeIfClause = "", preserve = None):
     #TODO add functionality for looping certain amount of times
-    waitThenExecuteFunction(interpreter, fn, interval, fn.namespace + ":" + fn.name, preserve)
+    waitThenExecuteFunction(interpreter, fn, interval, fn.name, executeIfClause, preserve)
 LocalBuiltInFunctionsDict["loop"] = loop
 
-def breakMcFunction(interpreter, fn, mcFunction, executeClause = ""):
-    if executeClause[-3:] != "run" and executeClause != "":
-        executeClause += " run "
-    fn.definition.append(executeClause + "schedule clear " + mcFunction)
+def breakMcFunction(interpreter, fn, mcFunction, executeIfClause =""):
+    if executeIfClause[-3:] != "run" and executeIfClause != "":
+        executeIfClause += " run "
+    fn.definition.append(executeIfClause + "schedule clear " + mcFunction)
 LocalBuiltInFunctionsDict["break"] = breakMcFunction
 
-def waitThenExecuteFunction(interpreter, fn, waitTime, mcFunction, preserve = None):
+def waitThenExecuteFunction(interpreter, fn, waitTime, mcFunction, executeIfClause = "", preserve = None):
     #TODO add functionality for preserver position
-    fn.definition.append("schedule function " + mcFunction + " " + waitTime + " append")
+    if executeIfClause[-3:] != "run" and executeIfClause != "":
+        executeIfClause += " run "
+    fn.definition.append(executeIfClause + "schedule function " + mcFunction + " " + waitTime + " append")
 LocalBuiltInFunctionsDict["wait"] = waitThenExecuteFunction
+
+def breakAll(interpreter,fn):
+    allfn = interpreter.memory.function.keys()
+    for x in allfn:
+        fn.definition.append("schedule clear " + x)
+LocalBuiltInFunctionsDict["break.all"] = breakAll

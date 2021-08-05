@@ -98,7 +98,7 @@ class Interpreter:
         self.memory.function[fn.name] = fn
         if not fn.abstraction: #non abstract, need to implement the function
             assertExistNamespace(self.memory)
-            with open(self.memory.getCurrentNamespacePath() + "/functions/" + fn.name + ".mcfunction", 'w') as outfile:
+            with open(self.memory.getCurrentNamespacePath() + "/functions/" + fn.name.split(":")[1] + ".mcfunction", 'w') as outfile:
                 outfile.write(fn.commandRepresentation())
 
     #EFFECTS: it is a build in function, execute the function.
