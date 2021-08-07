@@ -65,13 +65,21 @@ item.modifier.setNBT(compass_the_end, tag, "<{LodestoneDimension:"minecraft:the_
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~perk~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #-----basic set up-----#
 #PERK CONSTANTS
-PERK_SCORE = [en_re, ho_sm, frag]
-HELPER_PERK_SCORE = [ho_sm_count]
+PERK_SCORE = [en_re, ho_sm, frag, fa_ca, phoe]
+HELPER_PERK_SCORE = [ho_sm_count, phoe_charge]
 
 namespace.set(perk)
 def basic_property_score_setup(){
     scoreboard objectives add health health
+    scoreboard objectives add death_count deathCount
+    scoreboard objectives add gapple_count minecraft.used:minecraft.golden_apple
+    scoreboard objectives add god_gapple_count minecraft.used:minecraft.enchanted_golden_apple
+    scoreboard objectives add fire_tick dummy
 }
+def property_score_maintain(){
+    execute as @a store result score @s fire_tick run data get entity @s Fire
+}
+onTick(function perk:property_score_maintain)
 def scores_declare(){
     for.each(x, >PERK_SCORE<, scoreboard objectives add <x> dummy)
 }
@@ -79,6 +87,11 @@ def helper_score_declare(){
     for.each(x, >HELPER_PERK_SCORE<, scoreboard objectives add <x> dummy)
 }
 onLoad(function perk:basic_property_score_setup, function perk:scores_declare, function perk:helper_score_declare)
+onLoad("<tellraw @a {"text":"Perk for 1.17 loading succesful","color":"gold"}>")
+
+def heal(){
+    effect give @s minecraft:saturation 20
+}
 #-----basic set up-----#
 #-----actual perk-----#
 def enhanced_resiliance(){
@@ -118,11 +131,43 @@ def third_smite(){
 }
 
 def fragmentation(){
-    function perk:fragmentation_loop()
+    wait(32s, perk:fragmentation_loop)
 }
 def fragmentation_loop(){
-    forPerk(ho_sm, give @s tnt)
+    forPerk(frag, give @s tnt)
     loop(0, 32s)
+}
+
+recipe.shaped(fake_emerald_block, emerald_block, 1, empty, green_dye, empty, green_dye, chiseled_stone_bricks, green_dye, empty, green_dye, empty)
+recipe.shaped(fake_gold_block, gold_block, 1, empty, yellow_dye, empty, yellow_dye, smooth_stone, yellow_dye, empty, yellow_dye, empty)
+recipe.restrict(perk:fake_emerald_block, @a)
+recipe.restrict(perk:fake_gold_block, @a)
+def fake_cash(){
+    forPerk(fa_ca, recipe give @s perk:fake_emerald_block)
+    forPerk(fa_ca, recipe give @s perk:fake_gold_block)
+}
+
+def phoenix(){
+    forPerk(phoe, scoreboard players set @s phoe_charge 1)
+    function perk:phoenix_loop
+}
+def phoenix_loop(){
+    forPerk(phoe, execute if score @s gapple_count matches 1 run function perk:phoenix_refresh)
+    forPerk(phoe, execute if score @s god_gapple_count matches 1 run function perk:phoenix_refresh)
+    forPerk(phoe, execute if score @s health matches ..10 if score @s fire_tick matches 1.. if score @s phoe_charge matches 1 run function perk:phoenix_reborn)
+    loop()
+}
+def phoenix_reborn(){
+    effect give @s minecraft:regeneration 30 0
+    effect give @s minecraft:fire_resistance 30 0
+    scoreboard players set @s phoe_charge 0
+    tellraw @s [{"text":"Phoenix has been ","color":"aqua"},{"text":"activated","color":"light_purple"}]
+}
+def phoenix_refresh(){
+    scoreboard players set @s phoe_charge 1
+    scoreboard players set @s gapple_count 0
+    scoreboard players set @s god_gapple_count 0
+    tellraw @s [{"text":"Phoenix has been ","color":"aqua"},{"text":"recharged","color":"light_purple"}]
 }
 
 #-----actual perk-----#
@@ -140,6 +185,8 @@ def start(){
     function perk:enhanced_resiliance
     function perk:holy_smite
     function perk:fragmentation
+    function perk:fake_cash
+    function perk:phoenix
 }
 # TODO
 # score.clear

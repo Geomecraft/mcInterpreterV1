@@ -18,3 +18,4 @@ class Memory:
 class Flags:
     def __init__(self):
         self.onLandSnowball = False
+        self.recipeRestrictPlayer = False

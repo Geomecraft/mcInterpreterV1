@@ -258,3 +258,10 @@ def breakAll(interpreter,fn):
     for x in allfn:
         fn.definition.append("schedule clear " + x)
 LocalBuiltInFunctionsDict["break.all"] = breakAll
+
+def recipeRestrictPlayer(interpreter, craftingRecipeName, playerSelector):
+    if not interpreter.memory.flags.recipeRestrictPlayer:
+        interpreter.memory.flags.recipeRestrictPlayer = True
+        onLoad(interpreter,"gamerule doLimitedCrafting true", "recipe give @a *")
+    onLoad(interpreter, "recipe take " + playerSelector + " " + craftingRecipeName)
+GlobalBuiltInFunctionsDict["recipe.restrict"] = recipeRestrictPlayer
