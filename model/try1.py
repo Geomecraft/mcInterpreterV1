@@ -1,3 +1,4 @@
-lst = [1,2,"asdf"]
-print(str(lst))
-print([''])
+import os
+with open("/tryDirectory/someFile", "a") as outfile:
+    outfile.write("haha")
+

@@ -1,6 +1,7 @@
-from model.General import stripEachItem, parseFunctionUsage
+from model.General import stripEachItem
 from model.BuiltInFunction import GlobalBuiltInFunctionsDict, LocalBuiltInFunctionsDict
 from model.Syntax import FUNCTION_USAGE_SYNTAX
+from model.Parser import parseFunctionUsage
 
 
 class UserFunction:
@@ -48,30 +49,30 @@ class UserFunction:
         else:
             abstraction = False
 
-        name = definitionClause.split("(")[0]
+        name = parseFunctionUsage(definitionClause)[0]
+        parameters = parseFunctionUsage(definitionClause)[1]
         if not abstraction:
             name = interpreter.memory.currentNamespace + ":" + name
-
-        parameters = definitionClause.split("(")[1][:-1].split(",")
-        stripEachItem(parameters)
 
         definition = []
         thisfn = cls(name, parameters, definition, abstraction)
 
-        if len(los) > 1:
-            for i in range(1,len(los)):
-                if FUNCTION_USAGE_SYNTAX.fullmatch(los[i]) and los[i][0] != "#": #is a function call, and if it is commented out just add that whatever onto body anyways since it wont run
-                    fnName = parseFunctionUsage(los[i])[0]
-                    fnlop = parseFunctionUsage(los[i])[1]
-                    if fnName in GlobalBuiltInFunctionsDict.keys():
-                        GlobalBuiltInFunctionsDict[fnName](interpreter, *fnlop)
-                    elif fnName in LocalBuiltInFunctionsDict.keys():
-                        LocalBuiltInFunctionsDict[fnName](interpreter, thisfn, *fnlop)
-                    else:
-                        thisfn.definition += interpreter.memory.function[fnName].useAbstractFn(fnlop)
-                else:
-                    thisfn.definition.append(los[i])
+        localInterpreter = LocalInterpreter(interpreter, thisfn, los[1:], None)
+        localInterpreter.interpret()
 
+        # if len(los) > 1:
+        #     for i in range(1,len(los)):
+        #         if FUNCTION_USAGE_SYNTAX.fullmatch(los[i]) and los[i][0] != "#": #is a function call, and if it is commented out just add that whatever onto body anyways since it wont run
+        #             fnName = parseFunctionUsage(los[i])[0]
+        #             fnlop = parseFunctionUsage(los[i])[1]
+        #             if fnName in GlobalBuiltInFunctionsDict.keys():
+        #                 GlobalBuiltInFunctionsDict[fnName](interpreter, *fnlop)
+        #             elif fnName in LocalBuiltInFunctionsDict.keys():
+        #                 LocalBuiltInFunctionsDict[fnName](interpreter, thisfn, *fnlop)
+        #             else:
+        #                 thisfn.definition += interpreter.memory.function[fnName].useAbstractFn(fnlop)
+        #         else:
+        #             thisfn.definition.append(los[i])
         return thisfn
 
     def useAbstractFn(self, lop):
@@ -86,6 +87,7 @@ class UserFunction:
                 substituedBody.append(substituedLine)
             return substituedBody
 
+
     #helper to implement non-abstract functions
     def commandRepresentation(self):
         str = ""
@@ -94,6 +96,76 @@ class UserFunction:
             str += "\n"
         return str
 
+
+
+
+
+from model.Exceptions import NullError, ScopeError
+from model.Memory import Memory
+from model.Syntax import isComment, isLocalBuiltInFunctionUsage, isFunctionUsage, isGlobalBuiltInFunctionUsage
+
+
+class LocalInterpreter:
+
+    def __init__(self, parentInterpreter=None, incompletefn=None, content=None, memory=None, supressLineNumberUpdate = False):
+        if parentInterpreter is None:
+            raise NullError("No parent interpreter when calling local interpreter")
+        if content is None:
+            content = []
+        if memory is None:
+            memory = Memory()
+        self.parentInterpreter = parentInterpreter
+        self.currentLineNumber = 1
+        self.incompletefn = incompletefn
+        self.setContent(content)  # type list of string, first element is always "placeHolder" so list index line up with line number
+        self.memory = memory  # type Memory
+        self.supressLineNumberUpdate = supressLineNumberUpdate
+
+    def setContent(self, los):
+        self.content = ["placeholder"] + los
+        self.maximumLineNumber = len(los)
+
+    def getCurrentLine(self):
+        return self.content[self.currentLineNumber].strip()
+
+    def exceptionLineMsg(self):
+        #TODO
+        # this line message only works for literal lines, does not work if local interpreter is used implicitly or called again
+        # how do we fix this?
+        return "At line " + str(self.currentLineNumber + self.parentInterpreter.currentLineNumber) + ", "
+
+    def interpretAsComment(self):
+        self.incompletefn.definition.append(self.getCurrentLine())
+
+    def interpretAsFunctionUsage(self):
+        pass
+
+    def interpretAsLocalBuiltInFunctionUsage(self, fnName, fnlop):
+        LocalBuiltInFunctionsDict[fnName](self.parentInterpreter, self.incompletefn, *fnlop)
+
+    def interpret(self):
+        while (self.currentLineNumber <= self.maximumLineNumber):
+            if isComment(self.getCurrentLine()):
+                self.interpretAsComment()
+            elif isFunctionUsage(self.getCurrentLine()):
+                fnName = parseFunctionUsage(self.getCurrentLine())[0]
+                fnlop = parseFunctionUsage(self.getCurrentLine())[1]
+
+                if isLocalBuiltInFunctionUsage(self.getCurrentLine()):
+                    self.interpretAsLocalBuiltInFunctionUsage(fnName, fnlop)
+                elif isGlobalBuiltInFunctionUsage(self.getCurrentLine()):
+                    raise ScopeError(
+                        self.exceptionLineMsg() + "Cannot call global built in function from within a mcfunction")
+                else:  # abstract function
+                    expandedAbstractFn = self.parentInterpreter.memory.function[fnName].useAbstractFn(fnlop)
+                    local2Interpreter = LocalInterpreter(self.parentInterpreter, self.incompletefn, expandedAbstractFn, self.memory, True)
+                    local2Interpreter.interpret()
+            else:
+                self.incompletefn.definition.append(self.getCurrentLine())
+            self.currentLineNumber += 1
+
+        if not self.supressLineNumberUpdate:
+            self.parentInterpreter.currentLineNumber = self.parentInterpreter.currentLineNumber + self.currentLineNumber
 
 
 

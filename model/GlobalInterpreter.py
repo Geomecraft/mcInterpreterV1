@@ -5,8 +5,10 @@ import re
 from model import BuiltInFunction
 from model.DebugLog import DebugElementInfo, DebugElementMemory, DebugLog
 from model.Exceptions import AbstractionError, IncorrectArguments, SyntaxError, NullError
-from model.General import stripEachItem, parseFunctionUsage, assertExistNamespace
-from model.Syntax import CONSTANT_DEFINITION_SYNTAX, FUNCTION_USAGE_SYNTAX, FUNCTION_DEFINITION_SYNTAX
+from model.General import stripEachItem, assertExistNamespace
+from model.Syntax import CONSTANT_DEFINITION_SYNTAX, FUNCTION_USAGE_SYNTAX, FUNCTION_DEFINITION_SYNTAX, isComment, \
+    isConstantDefinition, isFunctionDefinition, isFunctionUsage
+from model.Parser import parseFunctionUsage
 from model.UserFunction import UserFunction
 from model.Memory import Memory
 from model.Options import Options
@@ -14,61 +16,36 @@ from model.Options import Options
 #CONSTANTS
 BUILT_IN_FN = BuiltInFunction.GlobalBuiltInFunctionsDict
 
-class Interpreter:
+class GlobalInterpreter:
 
-    def __init__(self, content = None, memory=None, currentLineNumber=1, maximumLineNumber = None, options=None, debugLog=None):
+    def __init__(self, content= None, memory=None, currentLineNumber=1, options=None, debugLog=None):
+        if content is None:
+            content = []
         if memory is None:
             memory = Memory()
         if options is None:
             options = Options()
         if debugLog is None:
             debugLog = DebugLog()
-        self.content = content #type list of string
+        self.setContent(content) #type list of string, first element is always "placeHolder" so list index line up with line number
         self.memory = memory #type Memory
         self.currentLineNumber = currentLineNumber #type int
-        self.maximumLineNumber = maximumLineNumber #type int
         self.options = options #type Options
         self.debugLog = debugLog #type DebugLog
 
-    #EFFECTS: read in all of a certain file, and then store the information as a list with each element representing a line. list Index is lined up with line number
-    #MODIFIES: self.content
-    def setContent(self, filePath):
-        f = open(filePath, "r")
-        self.content = ["placeHolder"] #so list index line up with line number
-        self.content += f.read().split("\n")
-        f.close()
+    def setContent(self,los):
+        self.content = ["placeholder"] + los
+        self.maximumLineNumber = len(los)
 
-    #EFFECTS: extract the line in string corresponding to the current line number to be processed. Begining and end spaces are removed since indent does not matter in this language.
-    #MODIFIES: self.getCurrentLine()
+    def setContentFromPath(self):
+        with open(self.options.datapackInputPath + "/" + self.options.mainFilePath, "r") as infile:
+            self.setContent(infile.read().split("\n"))
+
     def getCurrentLine(self):
         return self.content[self.currentLineNumber].strip()
 
-    #EFFECTS: line number increases by one and setCurrentLine
-    #MODIFIES: self.getCurrentLine() and self.currentLineNumber
-    # def gotoNextLine(self):
-    #     self.currentLineNumber += 1
-    #     self.setCurrentLine()
-
     def exceptionLineMsg(self):
         return "At line " + str(self.currentLineNumber) + ", "
-
-
-
-    #EFFECTS: see if this line of code is suppose to do X (for all isX function below)
-    def isComment(self):
-        if self.getCurrentLine() != "":
-            return self.getCurrentLine()[0] == "#"
-
-    def isConstantDefinition(self):
-        return CONSTANT_DEFINITION_SYNTAX.fullmatch(self.getCurrentLine())
-
-    def isFunctionDefinition(self):
-        return FUNCTION_DEFINITION_SYNTAX.fullmatch(self.getCurrentLine())
-
-    def isFunctionUsage(self):
-        return FUNCTION_USAGE_SYNTAX.fullmatch(self.getCurrentLine())
-
-
 
     #EFFECTS: do nothing because it is a comment
     def interpretAsComment(self):
@@ -86,14 +63,22 @@ class Interpreter:
             else:
                 self.content[i] = self.content[i].replace(">" + name + "<", value)
 
-
     #EFFECTS: write the newly defined function in memory, and implement it if it is not an abstract function
     def interpretAsFunctionDefinition(self):
+
+        #scrapping the function information into los
+        #first line
         los = [self.getCurrentLine()[:-1].strip()]
+        originalLineNumber = self.currentLineNumber
+
+        #all the other lines
         self.currentLineNumber += 1
         while(self.getCurrentLine() != "}"):
             los.append(self.getCurrentLine())
             self.currentLineNumber += 1
+        self.currentLineNumber = originalLineNumber
+
+        #construct and implement function
         fn = UserFunction.constructFromInterpretation(self, los)
         self.memory.function[fn.name] = fn
         if not fn.abstraction: #non abstract, need to implement the function
@@ -111,24 +96,24 @@ class Interpreter:
         else:
             BUILT_IN_FN[fnName](self,*fnlop)
 
-
-
-    def interpret(self, filePath):
-        self.setContent(self.options.datapackInputPath + filePath)
-        originalPath = os.getcwd()
-        os.chdir(os.getcwd() + "/" + self.options.datapackOutputPath)
-        self.maximumLineNumber = len(self.content) - 1
-
+    def interpret(self):
         while (self.currentLineNumber <= self.maximumLineNumber):
-            if self.isComment():
+            if isComment(self.getCurrentLine()):
                 self.interpretAsComment()
-            elif self.isConstantDefinition():
+            elif isConstantDefinition(self.getCurrentLine()):
                 self.interpretAsConstantDefinition()
-            elif self.isFunctionDefinition():
+            elif isFunctionDefinition(self.getCurrentLine()):
                 self.interpretAsFunctionDefinition()
-            elif self.isFunctionUsage():
+            elif isFunctionUsage(self.getCurrentLine()):
                 self.interpretAsFunctionUsage()
             self.currentLineNumber += 1
+
+    def interpretPath(self):
+        self.setContentFromPath()
+        originalPath = os.getcwd()
+        os.chdir(os.getcwd() + "/" + self.options.datapackOutputPath)
+
+        self.interpret()
 
         #change back to original path
         os.chdir(originalPath)

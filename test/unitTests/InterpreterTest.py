@@ -1,20 +1,20 @@
-from model.Interpreter import Interpreter
+from model.GlobalInterpreter import GlobalInterpreter
 
 def setContentTest():
-    interpreter = Interpreter()
-    interpreter.setContent("setContentTestFile")
+    interpreter = GlobalInterpreter()
+    interpreter.setContentFromPath("setContentTestFile")
     assert (interpreter.content == ['placeHolder', '    some content', 'some other content', '', 'new line before', 'new line after', '', 'lol'])
 setContentTest()
 
 def setCurrentLineTest():
-    interpreter = Interpreter()
-    interpreter.setContent("setCurrentLineTestFile")
+    interpreter = GlobalInterpreter()
+    interpreter.setContentFromPath("setCurrentLineTestFile")
     interpreter.setCurrentLine()
     assert(interpreter.getCurrentLine() == "some content")
-setCurrentLineTest()
+# setCurrentLineTest()
 
 def isFunctionDefinitionTest():
-    interpreter = Interpreter()
+    interpreter = GlobalInterpreter()
     #true tests
     interpreter.currentLine = "def Manifest(){"
     assert interpreter.isFunctionDefinition()
@@ -37,10 +37,10 @@ def isFunctionDefinitionTest():
     assert not interpreter.isFunctionDefinition()
     interpreter.currentLine = "abstract random()"
     assert not interpreter.isFunctionDefinition()
-isFunctionDefinitionTest()
+# isFunctionDefinitionTest()
 
 def isFunctionUsageTest():
-    interpreter = Interpreter()
+    interpreter = GlobalInterpreter()
     interpreter.currentLine = "Manifest()"
     assert interpreter.isFunctionUsage()
     interpreter.currentLine = "enf(34, ph)"
@@ -62,12 +62,12 @@ def isFunctionUsageTest():
     assert not interpreter.isFunctionUsage()
     interpreter.currentLine = "()"
     assert not interpreter.isFunctionUsage()
-isFunctionUsageTest()
+# isFunctionUsageTest()
 
 def interpretAsFunctionDefinitionTest():
     def readAbstractFunctionOnlyCommands():
-        interpreter = Interpreter()
-        interpreter.interpret("interpretAsFunctionDefinitionTestFile_readAbstractFunctionOnlyCommands")
+        interpreter = GlobalInterpreter()
+        interpreter.interpretPath("interpretAsFunctionDefinitionTestFile_readAbstractFunctionOnlyCommands")
         fn = interpreter.memory.function["smiteWithinDistance"]
         assert (fn.name == "smiteWithinDistance")
         assert (fn.parameters == ['centerEntity', 'smiteEntityType', 'distance'])
@@ -75,8 +75,8 @@ def interpretAsFunctionDefinitionTest():
         assert (fn.abstraction == True)
     readAbstractFunctionOnlyCommands()
     def readAbstractFunctionWithCallingAbstractFunctions():
-        interpreter = Interpreter()
-        interpreter.interpret("interpretAsFunctionDefinitionTest_readAbstractFunctionWithCallingAbstractFunctions")
+        interpreter = GlobalInterpreter()
+        interpreter.interpretPath("interpretAsFunctionDefinitionTest_readAbstractFunctionWithCallingAbstractFunctions")
         fn1 = interpreter.memory.function["smiteWithinDistance"]
         fn2 = interpreter.memory.function["holySmiteWithSelfWithering"]
         assert (fn1.name == "smiteWithinDistance")
@@ -92,9 +92,15 @@ def interpretAsFunctionDefinitionTest():
         assert (fn2.abstraction == True)
     readAbstractFunctionWithCallingAbstractFunctions()
     def readAbstractFunctionWithCallingBuiltInFunctions():
-        interpreter = Interpreter()
-        interpreter.interpret("interpretAsFunctionDefinitionTest_readAbstractFunctionWithCallingBuiltInFunctions")
+        interpreter = GlobalInterpreter()
+        interpreter.interpretPath("interpretAsFunctionDefinitionTest_readAbstractFunctionWithCallingBuiltInFunctions")
         # fn = interpreter.memory.function[]
-interpretAsFunctionDefinitionTest()
+# interpretAsFunctionDefinitionTest()
+
+def interpretTest():
+    lst = ["Manifest(interpretTest, 6, just a datapack to test new interpret function)", "namespace.set(interptest)"]
+    interpreter = GlobalInterpreter(lst)
+    interpreter.interpret()
+# interpretTest()
 
     

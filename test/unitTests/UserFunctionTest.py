@@ -1,6 +1,6 @@
 
 #before
-from model.Interpreter import Interpreter
+from model.GlobalInterpreter import GlobalInterpreter
 from model.UserFunction import UserFunction
 
 

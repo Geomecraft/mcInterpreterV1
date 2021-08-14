@@ -1,5 +1,5 @@
 from model.General import clearDirectory
-from model.Interpreter import Interpreter
+from model.GlobalInterpreter import GlobalInterpreter
 import os
 
 #change path to mcInterpreterV1
@@ -11,7 +11,7 @@ import os
 #helpers
 def assertException(testPath, exceptionMessage):
     try:
-        Interpreter.interpret(testPath, True, False)
+        GlobalInterpreter.interpretPath(testPath, True, False)
         assert (False)
     except Exception as e:
         assert (str(e) == exceptionMessage)
@@ -21,28 +21,28 @@ def assertException(testPath, exceptionMessage):
 #before
 clearDirectory("output")
 def setupInterpreter():
-    interpreter = Interpreter()
+    interpreter = GlobalInterpreter()
     interpreter.options.datapackOutputPath = "output"
     return interpreter
 #actual tests
 def ManifestTest():
     interpreter = setupInterpreter()
-    interpreter.interpret("ManifestTest")
+    interpreter.interpretPath("ManifestTest")
 def NamespaceTest():
     interpreter = setupInterpreter()
-    interpreter.interpret("NamespaceTest")
+    interpreter.interpretPath("NamespaceTest")
 def RecipeTest():
     interpreter = setupInterpreter()
-    interpreter.interpret("RecipeTest")
+    interpreter.interpretPath("RecipeTest")
 def DefineUserFunctionsTest():
     interpreter = setupInterpreter()
-    interpreter.interpret("DefineUserFunctionsTest")
+    interpreter.interpretPath("DefineUserFunctionsTest")
 def ConstantsTest():
     interpreter = setupInterpreter()
-    interpreter.interpret("ConstantsTest")
+    interpreter.interpretPath("ConstantsTest")
 def LoopBreakAndWaitTest():
     interpreter = setupInterpreter()
-    interpreter.interpret("LoopBreakAndWaitTest")
+    interpreter.interpretPath("LoopBreakAndWaitTest")
 #Actual impelmenting stuff, run with caution
 # ManifestTest()
 # NamespaceTest()

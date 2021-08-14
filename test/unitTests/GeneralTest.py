@@ -1,4 +1,4 @@
-from model.General import parseFunctionUsage
+from model.Parser import parseFunctionUsage
 
 assert(parseFunctionUsage("try()") == ('try', ['']))
 assert(parseFunctionUsage("namespace.set(mutual_hunt)") == ('namespace.set', ['mutual_hunt']))

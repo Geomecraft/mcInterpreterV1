@@ -1,17 +1,15 @@
 import json
 
-from model.Interpreter import Interpreter
+from model.GlobalInterpreter import GlobalInterpreter
 from os import listdir, getcwd
 from model.General import clearDirectory
 
 #clean output
+from model.Options import Options
+
 clearDirectory("output")
 
 #produce new data pack
-with open("input/option.json","r") as infile:
-    options = json.loads(infile.read())
-    interpreter = Interpreter()
-    interpreter.options.datapackOutputPath = options["outputPath"]
-    interpreter.options.datapackInputPath = options["inputPath"]
-    interpreter.interpret("/" + options["main"])
-    # print(interpreter.memory.function)
+interpreter = GlobalInterpreter()
+interpreter.options = Options.constructFromJsonFile("option.json")
+interpreter.interpretPath()

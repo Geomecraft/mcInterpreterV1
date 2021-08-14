@@ -2,8 +2,10 @@ import os
 import json
 from math import sqrt
 
-from model.General import assertExistNamespace, stripEachItem, parseFunctionUsage
-from model.Syntax import FUNCTION_USAGE_SYNTAX
+
+from model.General import assertExistNamespace, stripEachItem
+from model.Parser import parseList, parseFunctionUsage
+import model
 
 
 class BuiltInFunction:
@@ -22,58 +24,60 @@ LocalBuiltInFunctionsDict = {}
 
 #Actual functions
 def Manifest(interpreter, name, formatNum, description):
+    memory = interpreter.memory
     #pack folder and mcmeta
     os.makedirs(name + "/data")
     data = {"pack":{"pack_format": int(formatNum), "description": description}}
     with open(name + "/pack.mcmeta", 'w') as outfile:
         json.dump(data, outfile, indent=INDENT)
-    interpreter.memory.dataPackName = name
+    memory.dataPackName = name
 
     #create default minecraft namespace
     os.mkdir(name + "/data/minecraft")
     os.makedirs(name + "/data/minecraft/tags/functions")
 
     #create load and tick
-    with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/load.json", 'w') as outfile:
+    with open(memory.dataPackName + "/data/minecraft/tags/functions/load.json", 'w') as outfile:
         json.dump({"values":[]}, outfile, indent=INDENT)
-    with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/tick.json", 'w') as outfile:
+    with open(memory.dataPackName + "/data/minecraft/tags/functions/tick.json", 'w') as outfile:
         json.dump({"values":[]}, outfile, indent=INDENT)
 
     return "Datapack Manifestation Succesful"
 GlobalBuiltInFunctionsDict["Manifest"] = Manifest
 
 def setCurrentNamespace(interpreter,namespace):
-    interpreter.memory.currentNamespace = namespace
-    if namespace in interpreter.memory.namespaces:
+    memory = interpreter.memory
+    memory.currentNamespace = namespace
+    if namespace in memory.namespaces:
         pass
     else:
         #remember this namespace
-        interpreter.memory.namespaces.append(namespace)
+        memory.namespaces.append(namespace)
 
         #namespace  and namespace path creation
-        os.mkdir(interpreter.memory.getCurrentNamespacePath())
+        os.mkdir(memory.getCurrentNamespacePath())
 
         #subdirectories creation
-        os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/recipes")
-        os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/functions")
-        os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/predicates")
-        os.mkdir(interpreter.memory.getCurrentNamespacePath() + "/item_modifiers")
+        os.mkdir(memory.getCurrentNamespacePath() + "/recipes")
+        os.mkdir(memory.getCurrentNamespacePath() + "/functions")
+        os.mkdir(memory.getCurrentNamespacePath() + "/predicates")
+        os.mkdir(memory.getCurrentNamespacePath() + "/item_modifiers")
 
         #add on load and tick function for this namespace
-        with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/load.json", 'r') as infile:
+        with open(memory.dataPackName + "/data/minecraft/tags/functions/load.json", 'r') as infile:
             loadData = json.loads(infile.read())
             loadData["values"].append(namespace + ":load")
-        with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/load.json", 'w') as outfile:
+        with open(memory.dataPackName + "/data/minecraft/tags/functions/load.json", 'w') as outfile:
             json.dump(loadData, outfile, indent=INDENT)
-        with open(interpreter.memory.getCurrentNamespacePath() + "/functions/load.mcfunction", 'w') as outfile:
+        with open(memory.getCurrentNamespacePath() + "/functions/load.mcfunction", 'w') as outfile:
             outfile.write("")
 
-        with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/tick.json", 'r') as infile:
+        with open(memory.dataPackName + "/data/minecraft/tags/functions/tick.json", 'r') as infile:
             tickData = json.loads(infile.read())
             tickData["values"].append(namespace + ":tick")
-        with open(interpreter.memory.dataPackName + "/data/minecraft/tags/functions/tick.json", 'w') as outfile:
+        with open(memory.dataPackName + "/data/minecraft/tags/functions/tick.json", 'w') as outfile:
             json.dump(tickData, outfile, indent=INDENT)
-        with open(interpreter.memory.getCurrentNamespacePath() + "/functions/tick.mcfunction", 'w') as outfile:
+        with open(memory.getCurrentNamespacePath() + "/functions/tick.mcfunction", 'w') as outfile:
             outfile.write("")
 
 GlobalBuiltInFunctionsDict["namespace.set"] = setCurrentNamespace
@@ -171,10 +175,12 @@ def onTick(interpreter, *commands):
 GlobalBuiltInFunctionsDict["onTick"] = onTick
 
 def onLandSnowball(interpreter, tag, *commands):
-    originalNamespace = interpreter.memory.currentNamespace
-    if not interpreter.memory.flags.onLandSnowball:
+    memory = interpreter.memory
+    originalNamespace = memory.currentNamespace
+    #namespace for functionality only need to set once
+    if not memory.flags.onLandSnowball:
         setCurrentNamespace(interpreter,"sys_0_snowball")
-        functionPath = interpreter.memory.getCurrentNamespacePath() + "/functions/"
+        functionPath = memory.getCurrentNamespacePath() + "/functions/"
         with open(functionPath + "init.mcfunction", 'w') as outfile:
             outfile.write("scoreboard objectives add visfix dummy\n"
                           "scoreboard players set .-1 visfix -1\n"
@@ -185,9 +191,10 @@ def onLandSnowball(interpreter, tag, *commands):
         onLoad(interpreter, "function sys_0_snowball:init")
         onTick(interpreter, "scoreboard players operation .global visfix *= .-1 visfix")
 
-    index = str(interpreter.memory.sysIndex)
+    #namespcae for functionality need to individually tweaked for each different landing snow ball with different tags
+    index = str(memory.sysIndex)
     setCurrentNamespace(interpreter,"sys_" + index + "_snowball")
-    functionPath = interpreter.memory.getCurrentNamespacePath() + "/functions/"
+    functionPath = memory.getCurrentNamespacePath() + "/functions/"
     with open(functionPath + "found_ball.mcfunction", 'w') as outfile:
         outfile.write("summon snowball ~ ~ ~ {Tags:[\"" + tag + "\",\"init\"],Passengers:[{id:\"minecraft:area_effect_cloud\",Age:-2147483648,Duration:-1,WaitTime:-2147483648,Tags:[\"sys_spitem_" + index + "\"]}]}\n"
                       "data modify entity @e[type=snowball,tag=" + tag + ",tag=init,limit=1] Owner set from entity @s Owner\n"
@@ -200,11 +207,11 @@ def onLandSnowball(interpreter, tag, *commands):
         for x in commands:
             outfile.write(x + "\n")
     with open(functionPath + "main.mcfunction",'w') as outfile:
-        outfile.write("execute as @e[type=snowball,tag=!" + tag + ",nbt={Item:{tag:{" + tag + ":1b}}}] at @s run function " + interpreter.memory.currentNamespace + ":found_ball\n"
-                      "execute as @e[type=area_effect_cloud,tag=sys_spitem_" + index + "] unless predicate "+ interpreter.memory.currentNamespace + ":is_riding_snowball at @s run function " + interpreter.memory.currentNamespace + ":landed\n"
+        outfile.write("execute as @e[type=snowball,tag=!" + tag + ",nbt={Item:{tag:{" + tag + ":1b}}}] at @s run function " + memory.currentNamespace + ":found_ball\n"
+                      "execute as @e[type=area_effect_cloud,tag=sys_spitem_" + index + "] unless predicate " + memory.currentNamespace + ":is_riding_snowball at @s run function " + memory.currentNamespace + ":landed\n"
                       "execute as @e[type=snowball,tag=" + tag + "] run function sys_0_snowball:vis_fix\n")
-    onTick(interpreter, "function " + interpreter.memory.currentNamespace + ":main")
-    with open(interpreter.memory.getCurrentNamespacePath() + "/predicates/" + "is_riding_snowball.json",'w') as outfile:
+    onTick(interpreter, "function " + memory.currentNamespace + ":main")
+    with open(memory.getCurrentNamespacePath() + "/predicates/" + "is_riding_snowball.json", 'w') as outfile:
         data = {"condition": "minecraft:entity_properties",
                 "entity": "this",
                 "predicate": {
@@ -214,15 +221,14 @@ def onLandSnowball(interpreter, tag, *commands):
                     }
                 }}
         json.dump(data, outfile, indent=INDENT)
-    interpreter.memory.sysIndex += 1
-    interpreter.memory.flags.onLandSnowball = True
+    memory.sysIndex += 1
+    memory.flags.onLandSnowball = True
     setCurrentNamespace(interpreter,originalNamespace)
 GlobalBuiltInFunctionsDict["onLand"] = onLandSnowball
 
 def forEach(interpreter, fn, var, collection, abstractBody):
-    collectionlst = collection[1:-1].split(",")
-    stripEachItem(collectionlst)
-    if FUNCTION_USAGE_SYNTAX.fullmatch(abstractBody): #abstract function
+    collectionlst = parseList(collection)
+    if model.Syntax.FUNCTION_USAGE_SYNTAX.fullmatch(abstractBody): #abstract function #TODO, functionality not yet tested
         fnName = parseFunctionUsage(abstractBody)[0]
         fnlop = parseFunctionUsage(abstractBody)[1]
         for x in collectionlst:
@@ -234,6 +240,19 @@ def forEach(interpreter, fn, var, collection, abstractBody):
         for x in collectionlst:
             fn.definition.append(abstractBody.replace("<" + var + ">", x))
 LocalBuiltInFunctionsDict["for.each"] = forEach
+
+def forEachGlobal(interpreter, var, collection, globalFunctionCall):
+    collectionlst = parseList(collection)
+    #TODO, refactor interpreter so it no longer deals with file input and only with interpreting,
+    # and then use the power of interpreter to interpret whatever is inputed in forEachGlobal.
+    # Details such as how to handle line number and stuff need to be thought out
+    # if FUNCTION_USAGE_SYNTAX.fullmatch(abstractBody): #abstract function
+    #     pass
+    # else: #abstract command
+    #     for x in collectionlst:
+    #         fn.definition.append(abstractBody.replace("<" + var + ">", x))
+
+
 
 def loop(interpreter, fn, num = "0", interval = "1t", executeIfClause = "", preserve = None):
     #TODO add functionality for looping certain amount of times
@@ -265,3 +284,6 @@ def recipeRestrictPlayer(interpreter, craftingRecipeName, playerSelector):
         onLoad(interpreter,"gamerule doLimitedCrafting true", "recipe give @a *")
     onLoad(interpreter, "recipe take " + playerSelector + " " + craftingRecipeName)
 GlobalBuiltInFunctionsDict["recipe.restrict"] = recipeRestrictPlayer
+
+def importAdvancment(interpreter, advancementFile):
+    pass
