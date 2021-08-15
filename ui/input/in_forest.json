@@ -1,0 +1,215 @@
+{
+    "criteria": {
+        "inCrimsonForest": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:crimson_forest"
+            }
+        },
+        "inWarpedForest": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:warped_forest"
+            }
+        },
+        "inForest": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:forest"
+            }
+        },
+        "inFlowerForest": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:flower_forest"
+            }
+        },
+        "inBirchForest": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:birch_forest"
+            }
+        },
+        "inTallBirchForest": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:tall_birch_forest"
+            }
+        },
+        "inDarkForest": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:dark_forest"
+            }
+        },
+        "inDarkForestHill": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:dark_forest_hills"
+            }
+        },
+        "inBirchForestHills": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:birch_forest_hills"
+            }
+        },
+        "inTallBirchHills": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:tall_birch_hills"
+            }
+        },
+        "inJungle": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:jungle"
+            }
+        },
+        "inJungleHills": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:jungle_hills"
+            }
+        },
+        "inJungleEdge": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:jungle_edge"
+            }
+        },
+        "inBambooJungle": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:bamboo_jungle"
+            }
+        },
+        "inBambooJungleHills": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:bamboo_jungle_hills"
+            }
+        },
+        "inModifiedJungle": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:modified_jungle"
+            }
+        },
+        "inModifiedJungleEdge": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:modified_jungle_edge"
+            }
+        },
+        "inTaiga": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:taiga"
+            }
+        },
+        "inTaigaHills": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:taiga_hills"
+            }
+        },
+        "inTaigaMountains": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:taiga_mountains"
+            }
+        },
+        "inSnowyTaiga": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:snowy_taiga"
+            }
+        },
+        "inSnowyTaigaHills": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:snowy_taiga_hills"
+            }
+        },
+        "inSnowyTaigaMountains": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:snowy_taiga_mountains"
+            }
+        },
+        "inGiantTreeTaiga": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:giant_tree_taiga"
+            }
+        },
+        "inGiantTreeTaigaHills": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:giant_tree_taiga_hills"
+            }
+        },
+        "inGiantSpruceTaiga": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:giant_spruce_taiga"
+            }
+        },
+        "inGiantSpruceTaigaHills": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:giant_spruce_taiga_hills"
+            }
+        },
+        "inWoodedHills": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:wooded_hills"
+            }
+        },
+        "inWoodedMountains": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:wooded_mountains"
+            }
+        }
+    },
+    "requirements": [
+        [
+            "inCrimsonForest",
+            "inForest",
+            "inFlowerForest",
+            "inBirchForest",
+            "inTallBirchForest",
+            "inDarkForestHill",
+            "inDarkForest",
+            "inBirchForestHills",
+            "inTallBirchHills",
+            "inJungle",
+            "inJungleHills",
+            "inJungleEdge",
+            "inBambooJungle",
+            "inWarpedForest",
+            "inBambooJungleHills",
+            "inModifiedJungle",
+            "inModifiedJungleEdge",
+            "inTaiga",
+            "inTaigaHills",
+            "inTaigaMountains",
+            "inSnowyTaiga",
+            "inSnowyTaigaHills",
+            "inSnowyTaigaMountains",
+            "inGiantTreeTaiga",
+            "inGiantTreeTaigaHills",
+            "inGiantSpruceTaiga",
+            "inGiantSpruceTaigaHills",
+            "inWoodedHills",
+            "inWoodedMountains"
+        ]
+    ],
+    "rewards": {
+        "function": "perk:deep_forest_explorer_grant_effect"
+    },
+    "parent": "perk:root"
+}

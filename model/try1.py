@@ -1,4 +1,8 @@
-import os
-with open("/tryDirectory/someFile", "a") as outfile:
-    outfile.write("haha")
+class op:
+    def __init__(self):
+        self.a = []
 
+b = op()
+aa = b.a
+aa.append("asdf")
+print(b.a)

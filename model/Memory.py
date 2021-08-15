@@ -15,7 +15,13 @@ class Memory:
     def getCurrentNamespacePath(self):
         return self.dataPackName + "/data/" + self.currentNamespace
 
+    def getIndex(self):
+        return str(self.sysIndex)
+
+    def increment(self):
+        self.sysIndex += 1
+
 class Flags:
     def __init__(self):
         self.onLandSnowball = False
-        self.recipeRestrictPlayer = False
+        self.onRightClick = False

@@ -1,4 +1,4 @@
-from model.General import clearDirectory
+from model.FileManage import clearDirectory
 from model.GlobalInterpreter import GlobalInterpreter
 import os
 
@@ -50,5 +50,5 @@ def LoopBreakAndWaitTest():
 # LoadAndTickTest()
 # DefineUserFunctionsTest()
 # ConstantsTest()
-LoopBreakAndWaitTest()
+# LoopBreakAndWaitTest()
 

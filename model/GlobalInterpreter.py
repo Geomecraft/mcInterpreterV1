@@ -47,6 +47,14 @@ class GlobalInterpreter:
     def exceptionLineMsg(self):
         return "At line " + str(self.currentLineNumber) + ", "
 
+    def fetchFromInput(self, filePathRelativeToInput):
+        originalPath = os.getcwd()
+        os.chdir(self.options.basePath + "/" + self.options.datapackInputPath)
+        with open(filePathRelativeToInput + ".json", "r") as infile:
+            str = infile.read()
+        os.chdir(originalPath)
+        return str
+
     #EFFECTS: do nothing because it is a comment
     def interpretAsComment(self):
         pass
@@ -100,23 +108,23 @@ class GlobalInterpreter:
         while (self.currentLineNumber <= self.maximumLineNumber):
             if isComment(self.getCurrentLine()):
                 self.interpretAsComment()
-            elif isConstantDefinition(self.getCurrentLine()):
-                self.interpretAsConstantDefinition()
             elif isFunctionDefinition(self.getCurrentLine()):
                 self.interpretAsFunctionDefinition()
             elif isFunctionUsage(self.getCurrentLine()):
                 self.interpretAsFunctionUsage()
+            elif isConstantDefinition(self.getCurrentLine()):
+                self.interpretAsConstantDefinition()
             self.currentLineNumber += 1
+            print(self.currentLineNumber)
 
     def interpretPath(self):
         self.setContentFromPath()
-        originalPath = os.getcwd()
-        os.chdir(os.getcwd() + "/" + self.options.datapackOutputPath)
+        os.chdir(self.options.basePath + "/" + self.options.datapackOutputPath)
 
         self.interpret()
 
         #change back to original path
-        os.chdir(originalPath)
+        os.chdir(self.options.basePath)
 
 #TODO
 # refactor all syntax related method from interpreter into file Syntax, and they no longer belong to this class.

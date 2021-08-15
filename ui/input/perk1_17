@@ -4,7 +4,7 @@ Manifest(perk for 1_17 manhunt, 7, by ItsGeomecraft)
 EFFECT_DEFAULT_LENGTH = 3
 UNDEAD = [zombie, skeleton,zombified_piglin]
 
-#some general purpose abstraction functions
+#some general purpose helper functions
 def abstract forPerk(perkScore, runnable){
     execute as @a[scores={<perkScore>=1}] run execute at @s run <runnable>
 }
@@ -65,8 +65,8 @@ item.modifier.setNBT(compass_the_end, tag, "<{LodestoneDimension:"minecraft:the_
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~perk~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #-----basic set up-----#
 #PERK CONSTANTS
-PERK_SCORE = [en_re, ho_sm, frag, fa_ca, phoe]
-HELPER_PERK_SCORE = [ho_sm_count, phoe_charge]
+PERK_SCORE = [en_re, ho_sm, frag, fa_ca, phoe, d_f_ex]
+HELPER_PERK_SCORE = [ho_sm_count, phoe_charge, d_f_ex_result, d_f_ex_id]
 
 namespace.set(perk)
 def basic_property_score_setup(){
@@ -89,8 +89,12 @@ def helper_score_declare(){
 onLoad(function perk:basic_property_score_setup, function perk:scores_declare, function perk:helper_score_declare)
 onLoad("<tellraw @a {"text":"Perk for 1.17 loading succesful","color":"gold"}>")
 
+#helpers
 def heal(){
     effect give @s minecraft:saturation 20
+}
+def regen1hp(){
+    effect give @s regeneration 1 2
 }
 #-----basic set up-----#
 #-----actual perk-----#
@@ -138,13 +142,12 @@ def fragmentation_loop(){
     loop(0, 32s)
 }
 
-recipe.shaped(fake_emerald_block, emerald_block, 1, empty, green_dye, empty, green_dye, chiseled_stone_bricks, green_dye, empty, green_dye, empty)
-recipe.shaped(fake_gold_block, gold_block, 1, empty, yellow_dye, empty, yellow_dye, smooth_stone, yellow_dye, empty, yellow_dye, empty)
-recipe.restrict(perk:fake_emerald_block, @a)
-recipe.restrict(perk:fake_gold_block, @a)
+recipe.custom.shaped(fake_emerald_block, emerald_block, 1, empty, green_dye, empty, green_dye, chiseled_stone_bricks, green_dye, empty, green_dye, empty)
+recipe.custom.shaped(fake_gold_block, gold_block, 1, empty, yellow_dye, empty, yellow_dye, smooth_stone, yellow_dye, empty, yellow_dye, empty)
+recipe.custom.restrict(fake_emerald_block, [scores={fa_ca=1}])
+recipe.custom.restrict(fake_gold_block, [scores={fa_ca=1}])
 def fake_cash(){
-    forPerk(fa_ca, recipe give @s perk:fake_emerald_block)
-    forPerk(fa_ca, recipe give @s perk:fake_gold_block)
+    #pass
 }
 
 def phoenix(){
@@ -170,6 +173,32 @@ def phoenix_refresh(){
     tellraw @s [{"text":"Phoenix has been ","color":"aqua"},{"text":"recharged","color":"light_purple"}]
 }
 
+recipe.custom.shaped(forest_star, "<carrot_on_a_stick{display:{Name:'{"text":"Forest Star","color":"#F700FF"}'},forest_star:1b}>", 1, empty, dark_oak_log, empty, dark_oak_log, redstone, dark_oak_log, empty, dark_oak_log, empty)
+recipe.custom.restrict(forest_star, [scores={d_f_ex=1}])
+onClick.right(forest_star, function perk:deep_forest_explorer_locate)
+import.adv(in_forest)
+def deep_forest_explorer(){
+    forPerk(d_f_ex, "<give @s leather_boots{display:{Name:'{"text":"Forest Exploration Boots"}'},Unbreakable:1b,Enchantments:[{id:"minecraft:feather_falling",lvl:5s}]} 1>")
+    advancement revoke @s only perk:in_forest
+}
+def deep_forest_explorer_grant_effect(){
+    forPerk(d_f_ex, function perk:regen1hp)
+    scoreboard players set @s d_f_ex_id 1
+    wait(10s, perk:deep_forest_explorer_refresh_effect)
+}
+def deep_forest_explorer_id_timer(){
+    forPerk(d_f_ex, execute if score @s d_f_ex_id matches 1.. run scoreboard players add @s d_f_ex_id 1)
+}
+onTick(function perk:deep_forest_explorer_id_timer)
+def deep_forest_explorer_refresh_effect(){
+    forPerk(d_f_ex, execute if score @s d_f_ex_id matches 201 run advancement revoke @s only perk:in_forest)
+    forPerk(d_f_ex, execute if score @s d_f_ex_id matches 201 run scoreboard players set @s d_f_ex_id 0)
+}
+def deep_forest_explorer_locate(){
+    execute store result score @s d_f_ex_result run locate mansion
+    tellraw @s [{"text":"Nerest Mansion is ","color":"green"},{"score":{"name":"@s","objective":"d_f_ex_result"}},{"text":" blocks away ","color":"green"}]
+}
+
 #-----actual perk-----#
 #-----starting function-----#
 #main function
@@ -187,6 +216,7 @@ def start(){
     function perk:fragmentation
     function perk:fake_cash
     function perk:phoenix
+    function perk:deep_forest_explorer
 }
 # TODO
 # score.clear

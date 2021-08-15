@@ -20,7 +20,17 @@ INDENT = 4
 GlobalBuiltInFunctionsDict = {}
 LocalBuiltInFunctionsDict = {}
 
+SYS_CUSTOM_RECIPE = "sys_custom_recipe"
+RESTRICT_CRAFTING_DISPATCH_FN_NAME_SUFFIX = "_restrict_dispatch"
+SYS_RIGHT_CLICK_DETECTION = "sys_right_click_detection"
+
 #built in function helpers
+def registerAsGlobal(function,name):
+    GlobalBuiltInFunctionsDict[name] = function
+
+def registerAsLocal(function, name):
+    LocalBuiltInFunctionsDict[name] = function
+
 
 #Actual functions
 def Manifest(interpreter, name, formatNum, description):
@@ -60,8 +70,10 @@ def setCurrentNamespace(interpreter,namespace):
         #subdirectories creation
         os.mkdir(memory.getCurrentNamespacePath() + "/recipes")
         os.mkdir(memory.getCurrentNamespacePath() + "/functions")
+        os.mkdir(memory.getCurrentNamespacePath() + "/advancements")
         os.mkdir(memory.getCurrentNamespacePath() + "/predicates")
         os.mkdir(memory.getCurrentNamespacePath() + "/item_modifiers")
+
 
         #add on load and tick function for this namespace
         with open(memory.dataPackName + "/data/minecraft/tags/functions/load.json", 'r') as infile:
@@ -79,6 +91,20 @@ def setCurrentNamespace(interpreter,namespace):
             json.dump(tickData, outfile, indent=INDENT)
         with open(memory.getCurrentNamespacePath() + "/functions/tick.mcfunction", 'w') as outfile:
             outfile.write("")
+
+        # add root advancement for this datapack
+        createAdvancement(interpreter, "root", {
+            "criteria": {
+                "Start": {
+                    "trigger": "minecraft:tick"
+                }
+            },
+            "requirements": [
+                [
+                    "Start"
+                ]
+            ]
+        })
 
 GlobalBuiltInFunctionsDict["namespace.set"] = setCurrentNamespace
 
@@ -278,12 +304,97 @@ def breakAll(interpreter,fn):
         fn.definition.append("schedule clear " + x)
 LocalBuiltInFunctionsDict["break.all"] = breakAll
 
-def recipeRestrictPlayer(interpreter, craftingRecipeName, playerSelector):
-    if not interpreter.memory.flags.recipeRestrictPlayer:
-        interpreter.memory.flags.recipeRestrictPlayer = True
-        onLoad(interpreter,"gamerule doLimitedCrafting true", "recipe give @a *")
-    onLoad(interpreter, "recipe take " + playerSelector + " " + craftingRecipeName)
-GlobalBuiltInFunctionsDict["recipe.restrict"] = recipeRestrictPlayer
+def recipeCustomRestrictPlayer(interpreter, customCraftingRecipeName, selectorArguments):
+    preserveNameSpace(interpreter)
 
-def importAdvancment(interpreter, advancementFile):
-    pass
+    setCurrentNamespace(interpreter, SYS_CUSTOM_RECIPE)
+    fnstr = accessFunction(interpreter, customCraftingRecipeName + RESTRICT_CRAFTING_DISPATCH_FN_NAME_SUFFIX)
+    fnstr = fnstr.replace("@s[]", "@s" + selectorArguments)
+    createFunction(interpreter,customCraftingRecipeName + RESTRICT_CRAFTING_DISPATCH_FN_NAME_SUFFIX,fnstr)
+
+    revertNameSpace(interpreter)
+registerAsGlobal(recipeCustomRestrictPlayer, "recipe.custom.restrict")
+
+def recipeCraftingShapedCustom(interpreter, recipeName, result, count, *loa):
+    preserveNameSpace(interpreter)
+
+    setCurrentNamespace(interpreter, SYS_CUSTOM_RECIPE)
+    recipeCraftingShaped(interpreter, recipeName, "minecraft:knowledge_book", 1,  *loa)
+    createFunction(interpreter, recipeName,
+                   "give @s " + result + " " + count,
+                   "clear @s minecraft:knowledge_book")
+    createFunction(interpreter, recipeName + RESTRICT_CRAFTING_DISPATCH_FN_NAME_SUFFIX,
+                   "execute as @s[] run function " + SYS_CUSTOM_RECIPE + ":" + recipeName,
+                   "recipe take @s " + SYS_CUSTOM_RECIPE + ":" + recipeName,
+                   "advancement revoke @s only " + SYS_CUSTOM_RECIPE + ":" + recipeName,)
+    advData = {
+        "criteria": {
+            recipeName: {
+                "trigger": "minecraft:recipe_unlocked",
+                "conditions": {
+                    "recipe": SYS_CUSTOM_RECIPE + ":" + recipeName
+                }
+            }
+        },
+        "requirements": [
+            [
+                recipeName
+            ]
+        ],
+        "rewards": {
+            "function": SYS_CUSTOM_RECIPE + ":" + recipeName + RESTRICT_CRAFTING_DISPATCH_FN_NAME_SUFFIX
+        },
+        "parent": SYS_CUSTOM_RECIPE + ":root"
+    }
+    createAdvancement(interpreter, recipeName, advData)
+    revertNameSpace(interpreter)
+registerAsGlobal(recipeCraftingShapedCustom, "recipe.custom.shaped")
+
+def onRightClick(interpreter, carrotOnAStickTag, *commands):
+    preserveNameSpace(interpreter)
+
+    memory = interpreter.memory
+    setCurrentNamespace(interpreter, SYS_RIGHT_CLICK_DETECTION)
+    if not memory.flags.onRightClick:
+        onLoad(interpreter, "scoreboard objectives add carrot_click minecraft.used:minecraft.carrot_on_a_stick")
+
+    ontick = accessFunction(interpreter, "tick")
+    ontick = ontick.replace("execute as @a[scores={carrot_click=1..}] at @s run scoreboard players set @s carrot_click 0", "")
+    createFunction(interpreter, "tick", ontick)
+
+    createFunction(interpreter, SYS_RIGHT_CLICK_DETECTION + "_" + memory.getIndex(), *commands)
+    onTick(interpreter, "execute as @a[scores={carrot_click=1..}, nbt={SelectedItem:{tag:{" + carrotOnAStickTag + ":1b}}}] at @s run function " + SYS_RIGHT_CLICK_DETECTION + ":" + SYS_RIGHT_CLICK_DETECTION + "_" + memory.getIndex(),
+           "execute as @a[scores={carrot_click=1..}] at @s run scoreboard players set @s carrot_click 0")
+
+    memory.increment()
+    revertNameSpace(interpreter)
+registerAsGlobal(onRightClick, "onClick.right")
+
+def importAdvancment(interpreter, advancementFilePath, advancementName = None):
+    if advancementName == None:
+        advancementName = advancementFilePath
+    advdict = json.loads(interpreter.fetchFromInput(advancementFilePath))
+    createAdvancement(interpreter, advancementName, advdict)
+registerAsGlobal(importAdvancment, "import.adv")
+
+def createFunction(interpreter, functionName, *FunctionBody):
+    with open(interpreter.memory.getCurrentNamespacePath() + "/functions/" + functionName + ".mcfunction",'w') as outfile:
+        str = ""
+        for x in FunctionBody:
+            str += x
+            str += "\n"
+        outfile.write(str)
+
+def accessFunction(interpreter, functionName):
+    with open(interpreter.memory.getCurrentNamespacePath() + "/functions/" + functionName + ".mcfunction",'r') as infile:
+        return infile.read()
+
+def createAdvancement(interpreter, advancementName, dict):
+    with open(interpreter.memory.getCurrentNamespacePath() + "/advancements/" + advancementName + ".json",'w') as outfile:
+        json.dump(dict, outfile, indent=INDENT)
+
+def preserveNameSpace(interpreter):
+    interpreter.memory.tempNamespace = interpreter.memory.currentNamespace
+
+def revertNameSpace(interpreter):
+    setCurrentNamespace(interpreter, interpreter.memory.tempNamespace)
