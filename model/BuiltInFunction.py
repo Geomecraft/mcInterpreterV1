@@ -350,6 +350,41 @@ def recipeCraftingShapedCustom(interpreter, recipeName, result, count, *loa):
     revertNameSpace(interpreter)
 registerAsGlobal(recipeCraftingShapedCustom, "recipe.custom.shaped")
 
+def recipeCraftingShapelessCustom(interpreter, recipeName, result, count, *loa):
+    preserveNameSpace(interpreter)
+
+    setCurrentNamespace(interpreter, SYS_CUSTOM_RECIPE)
+    recipeCraftingShapeless(interpreter, recipeName, "minecraft:knowledge_book", 1,  *loa)
+    createFunction(interpreter, recipeName,
+                   "give @s " + result + " " + count,
+                   "clear @s minecraft:knowledge_book")
+    createFunction(interpreter, recipeName + RESTRICT_CRAFTING_DISPATCH_FN_NAME_SUFFIX,
+                   "execute as @s[] run function " + SYS_CUSTOM_RECIPE + ":" + recipeName,
+                   "recipe take @s " + SYS_CUSTOM_RECIPE + ":" + recipeName,
+                   "advancement revoke @s only " + SYS_CUSTOM_RECIPE + ":" + recipeName,)
+    advData = {
+        "criteria": {
+            recipeName: {
+                "trigger": "minecraft:recipe_unlocked",
+                "conditions": {
+                    "recipe": SYS_CUSTOM_RECIPE + ":" + recipeName
+                }
+            }
+        },
+        "requirements": [
+            [
+                recipeName
+            ]
+        ],
+        "rewards": {
+            "function": SYS_CUSTOM_RECIPE + ":" + recipeName + RESTRICT_CRAFTING_DISPATCH_FN_NAME_SUFFIX
+        },
+        "parent": SYS_CUSTOM_RECIPE + ":root"
+    }
+    createAdvancement(interpreter, recipeName, advData)
+    revertNameSpace(interpreter)
+registerAsGlobal(recipeCraftingShapelessCustom, "recipe.custom.shapeless")
+
 def onRightClick(interpreter, carrotOnAStickTag, *commands):
     preserveNameSpace(interpreter)
 
@@ -377,6 +412,13 @@ def importAdvancment(interpreter, advancementFilePath, advancementName = None):
     createAdvancement(interpreter, advancementName, advdict)
 registerAsGlobal(importAdvancment, "import.adv")
 
+def importItemModifier(interpreter, itemModifierFilePath, itemModifierName = None):
+    if itemModifierName == None:
+        itemModifierName = itemModifierFilePath
+    itemdict = json.loads(interpreter.fetchFromInput(itemModifierFilePath))
+    createItemModifier(interpreter, itemModifierName, itemdict)
+registerAsGlobal(importItemModifier, "import.item.modifier")
+
 def createFunction(interpreter, functionName, *FunctionBody):
     with open(interpreter.memory.getCurrentNamespacePath() + "/functions/" + functionName + ".mcfunction",'w') as outfile:
         str = ""
@@ -392,6 +434,10 @@ def accessFunction(interpreter, functionName):
 def createAdvancement(interpreter, advancementName, dict):
     with open(interpreter.memory.getCurrentNamespacePath() + "/advancements/" + advancementName + ".json",'w') as outfile:
         json.dump(dict, outfile, indent=INDENT)
+
+def createItemModifier(interpreter, itemModifierName, itemdict):
+    with open(interpreter.memory.getCurrentNamespacePath() + "/item_modifiers/" + itemModifierName + ".json",'w') as outfile:
+        json.dump(itemdict, outfile, indent=INDENT)
 
 def preserveNameSpace(interpreter):
     interpreter.memory.tempNamespace = interpreter.memory.currentNamespace

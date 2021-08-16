@@ -1,0 +1,82 @@
+{
+    "criteria": {
+        "inOcean": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:ocean"
+            }
+        },
+        "inDeepOcean": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:deep_ocean"
+            }
+        },
+        "inFrozenOcean": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:frozen_ocean"
+            }
+        },
+        "inDeepFrozenOcean": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:deep_frozen_ocean"
+            }
+        },
+        "inColdOcean": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:cold_ocean"
+            }
+        },
+        "inDeepColdOcean": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:deep_cold_ocean"
+            }
+        },
+        "inLukewarmOcean": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:lukewarm_ocean"
+            }
+        },
+        "inDeepLukewarmOcean": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:deep_lukewarm_ocean"
+            }
+        },
+        "inWarmOcean": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:warm_ocean"
+            }
+        },
+        "inDeepWarmOcean": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "biome": "minecraft:deep_warm_ocean"
+            }
+        }
+    },
+    "requirements": [
+        [
+            "inOcean",
+            "inFrozenOcean",
+            "inDeepFrozenOcean",
+            "inColdOcean",
+            "inDeepColdOcean",
+            "inLukewarmOcean",
+            "inDeepOcean",
+            "inDeepLukewarmOcean",
+            "inWarmOcean",
+            "inDeepWarmOcean"
+        ]
+    ],
+    "rewards": {
+        "function": "perk:deep_ocean_explorer_effect"
+    },
+    "parent": "perk:root"
+}

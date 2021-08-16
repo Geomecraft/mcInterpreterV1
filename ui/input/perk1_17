@@ -2,7 +2,10 @@ Manifest(perk for 1_17 manhunt, 7, by ItsGeomecraft)
 
 #CONSTANTS
 EFFECT_DEFAULT_LENGTH = 3
+DEFAULT_SPECIAL_TEXT_COLOR = "light_purple"
+DEFAULT_INFO_TEXT_COLOR = "green"
 UNDEAD = [zombie, skeleton,zombified_piglin]
+SLOT_NUMBERS = [0,1,2,3,4,5,6,7,8]
 
 #some general purpose helper functions
 def abstract forPerk(perkScore, runnable){
@@ -65,8 +68,8 @@ item.modifier.setNBT(compass_the_end, tag, "<{LodestoneDimension:"minecraft:the_
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~perk~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #-----basic set up-----#
 #PERK CONSTANTS
-PERK_SCORE = [en_re, ho_sm, frag, fa_ca, phoe, d_f_ex]
-HELPER_PERK_SCORE = [ho_sm_count, phoe_charge, d_f_ex_result, d_f_ex_id]
+PERK_SCORE = [en_re, ho_sm, frag, fa_ca, phoe, d_f_ex, d_o_ex, mi_en]
+HELPER_PERK_SCORE = [ho_sm_count, phoe_charge, d_f_ex_result, d_f_ex_id, d_o_ex_result]
 
 namespace.set(perk)
 def basic_property_score_setup(){
@@ -173,7 +176,7 @@ def phoenix_refresh(){
     tellraw @s [{"text":"Phoenix has been ","color":"aqua"},{"text":"recharged","color":"light_purple"}]
 }
 
-recipe.custom.shaped(forest_star, "<carrot_on_a_stick{display:{Name:'{"text":"Forest Star","color":"#F700FF"}'},forest_star:1b}>", 1, empty, dark_oak_log, empty, dark_oak_log, redstone, dark_oak_log, empty, dark_oak_log, empty)
+recipe.custom.shaped(forest_star, "<carrot_on_a_stick{display:{Name:'{"text":"Forest Star","color":>DEFAULT_SPECIAL_TEXT_COLOR<}'},forest_star:1b}>", 1, empty, dark_oak_log, empty, dark_oak_log, redstone, dark_oak_log, empty, dark_oak_log, empty)
 recipe.custom.restrict(forest_star, [scores={d_f_ex=1}])
 onClick.right(forest_star, function perk:deep_forest_explorer_locate)
 import.adv(in_forest)
@@ -182,7 +185,7 @@ def deep_forest_explorer(){
     advancement revoke @s only perk:in_forest
 }
 def deep_forest_explorer_grant_effect(){
-    forPerk(d_f_ex, function perk:regen1hp)
+    execute if score @s d_f_ex matches 1 run function perk:regen1hp
     scoreboard players set @s d_f_ex_id 1
     wait(10s, perk:deep_forest_explorer_refresh_effect)
 }
@@ -196,7 +199,45 @@ def deep_forest_explorer_refresh_effect(){
 }
 def deep_forest_explorer_locate(){
     execute store result score @s d_f_ex_result run locate mansion
-    tellraw @s [{"text":"Nerest Mansion is ","color":"green"},{"score":{"name":"@s","objective":"d_f_ex_result"}},{"text":" blocks away ","color":"green"}]
+    tellraw @s [{"text":"Nerest Mansion is ","color":"green"},{"color":>DEFAULT_SPECIAL_TEXT_COLOR<,"score":{"name":"@s","objective":"d_f_ex_result"}},{"text":" blocks away ","color":"green"}]
+}
+
+recipe.custom.shaped(ocean_guide, "<carrot_on_a_stick{display:{Name:'{"text":"Ocean Guide","color":>DEFAULT_SPECIAL_TEXT_COLOR<}'},ocean_guide:1b}>", 1, empty, kelp, empty, kelp, redstone, kelp, empty, kelp, empty)
+recipe.custom.restrict(ocean_guide, [scores={d_o_ex=1}])
+onClick.right(ocean_guide, function perk:deep_ocean_explorer_locate)
+import.adv(in_ocean)
+def deep_ocean_explorer(){
+    forPerk(d_o_ex, "<give @s turtle_helmet{display:{Name:'{"text":"Ocean Explorer Helmet"}'},Unbreakable:1b,Enchantments:[{id:"minecraft:aqua_affinity",lvl:1s}]} 1>")
+    advancement revoke @s only perk:in_ocean
+}
+def deep_ocean_explorer_effect(){
+    execute if score @s d_o_ex matches 1 run effect give @s minecraft:dolphins_grace 3 0 true
+    advancement revoke @s only perk:in_ocean
+}
+def deep_ocean_explorer_locate(){
+    execute store result score @s d_o_ex_result run locate monument
+    tellraw @s [{"text":"Nerest Ocean Monument is ","color":>DEFAULT_INFO_TEXT_COLOR<},{"color":>DEFAULT_SPECIAL_TEXT_COLOR<,"score":{"name":"@s","objective":"d_o_ex_result"}},{"text":" blocks away ","color":>DEFAULT_INFO_TEXT_COLOR<}]
+}
+
+recipe.custom.shapeless(quick_iron, iron_ingot, 1, raw_iron)
+recipe.custom.restrict(quick_iron, [scores={mi_en=1}])
+recipe.custom.shapeless(quick_gold, gold_ingot, 1, raw_gold)
+recipe.custom.restrict(quick_gold, [scores={mi_en=1}])
+recipe.custom.shapeless(quick_flint, flint, 1, gravel)
+recipe.custom.restrict(quick_flint, [scores={mi_en=1}])
+recipe.custom.shapeless(more_debris, netherite_scrap, 2, ancient_debris)
+recipe.custom.restrict(more_debris, [scores={mi_en=1}])
+import.item.modifier(fortune4)
+def mining_engineer(){
+    function perk:mining_engineer_loop
+}
+def mining_engineer_loop(){
+    forPerk(mi_en, execute if entity @s[nbt={SelectedItem:{id:"minecraft:golden_pickaxe"}}] run enchant @s fortune 1)
+    forPerk(mi_en, execute if entity @s[nbt={SelectedItem:{id:"minecraft:stone_pickaxe"}}] run enchant @s fortune 1)
+    forPerk(mi_en, execute if entity @s[nbt={SelectedItem:{id:"minecraft:iron_pickaxe"}}] run enchant @s fortune 2)
+    forPerk(mi_en, execute if entity @s[nbt={SelectedItem:{id:"minecraft:diamond_pickaxe"}}] run enchant @s fortune 3)
+    forPerk(execute if entity @s[nbt={SelectedItem:{id:"minecraft:netherite_pickaxe"}}] run item modify entity @s weapon.mainhand perk:fortune4)
+    loop()
 }
 
 #-----actual perk-----#
@@ -217,6 +258,8 @@ def start(){
     function perk:fake_cash
     function perk:phoenix
     function perk:deep_forest_explorer
+    function perk:deep_ocean_explorer
+    function perk:mining_engineer
 }
 # TODO
 # score.clear
