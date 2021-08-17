@@ -1,0 +1,7 @@
+[
+  {
+    "function": "minecraft:set_nbt",
+    "tag": "{levitato_start:1b,levitato_stop:0b}",
+    "count": 1
+  }
+]

@@ -38,7 +38,9 @@ class GlobalInterpreter:
         self.maximumLineNumber = len(los)
 
     def setContentFromPath(self):
-        with open(self.options.datapackInputPath + "/" + self.options.mainFilePath, "r") as infile:
+        if self.options.datapackInputPath != "":
+            self.options.datapackInputPath += "/"
+        with open(self.options.datapackInputPath + self.options.mainFilePath, "r") as infile:
             self.setContent(infile.read().split("\n"))
 
     def getCurrentLine(self):

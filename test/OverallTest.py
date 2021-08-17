@@ -9,6 +9,9 @@ import os
 # print(os.getcwd())
 
 #helpers
+from model.Options import Options
+
+
 def assertException(testPath, exceptionMessage):
     try:
         GlobalInterpreter.interpretPath(testPath, True, False)
@@ -22,27 +25,36 @@ def assertException(testPath, exceptionMessage):
 clearDirectory("output")
 def setupInterpreter():
     interpreter = GlobalInterpreter()
-    interpreter.options.datapackOutputPath = "output"
+    interpreter.options = Options.constructFromJsonFile("option.json")
     return interpreter
 #actual tests
 def ManifestTest():
     interpreter = setupInterpreter()
-    interpreter.interpretPath("ManifestTest")
+    interpreter.options.mainFilePath = "ManifestTest"
+    interpreter.interpretPath()
 def NamespaceTest():
     interpreter = setupInterpreter()
-    interpreter.interpretPath("NamespaceTest")
+    interpreter.options.mainFilePath = "NamespaceTest"
+    interpreter.interpretPath()
 def RecipeTest():
     interpreter = setupInterpreter()
-    interpreter.interpretPath("RecipeTest")
+    interpreter.options.mainFilePath = "RecipeTest"
+    interpreter.interpretPath()
 def DefineUserFunctionsTest():
     interpreter = setupInterpreter()
-    interpreter.interpretPath("DefineUserFunctionsTest")
+    interpreter.options.mainFilePath = "DefineUserFunctionsTest"
+    interpreter.interpretPath()
 def ConstantsTest():
     interpreter = setupInterpreter()
-    interpreter.interpretPath("ConstantsTest")
+    interpreter.options.mainFilePath = "ConstantsTest"
+    interpreter.interpretPath()
 def LoopBreakAndWaitTest():
     interpreter = setupInterpreter()
-    interpreter.interpretPath("LoopBreakAndWaitTest")
+    interpreter.options.mainFilePath = "LoopBreakAndWaitTest"
+    interpreter.interpretPath()
+def LoopWaitAndWaitPreserveExecutorTest():
+    interpreter = setupInterpreter()
+    interpreter.options.mainFilePath = ""
 #Actual impelmenting stuff, run with caution
 # ManifestTest()
 # NamespaceTest()

@@ -280,8 +280,7 @@ def forEachGlobal(interpreter, var, collection, globalFunctionCall):
 
 
 
-def loop(interpreter, fn, num = "0", interval = "1t", executeIfClause = "", preserve = None):
-    #TODO add functionality for looping certain amount of times
+def loop(interpreter, fn, interval = "1t", executeIfClause = "", preserve = None):
     waitThenExecuteFunction(interpreter, fn, interval, fn.name, executeIfClause, preserve)
 LocalBuiltInFunctionsDict["loop"] = loop
 
