@@ -3,5 +3,9 @@
     "function": "minecraft:set_nbt",
     "tag": "{levitato_start:0b,levitato_stop:1b}",
     "count": 1
+  },
+  {
+    "function": "minecraft:set_name",
+    "name": "Stop Levitato"
   }
 ]

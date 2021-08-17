@@ -305,11 +305,11 @@ def waitThenExecuteFunctionPreserveExecutor(interpreter, fn, waitTime, mcFunctio
         executeIfClause += " run "
     def getWaitTimeInTickScore(rawWaitTime):
         if rawWaitTime[-1] == "t":
-            return rawWaitTime[:-1]
+            return str(int(rawWaitTime[:-1]) + 1)
         elif rawWaitTime[-1] == "s":
-            return str(int(rawWaitTime[:-1]) * 20)
+            return str(int(rawWaitTime[:-1]) * 20 + 1)
         elif rawWaitTime[-1] == "d":
-            return str(int(rawWaitTime[:-1]) * 24000)
+            return str(int(rawWaitTime[:-1]) * 24000 + 1)
     waitTimeInTickScore = getWaitTimeInTickScore(waitTime)
     def getSysIdString(interpreter):
         return "sys_id_" + interpreter.memory.getIndex()

@@ -240,49 +240,53 @@ def mining_engineer_loop(){
     loop()
 }
 
-onClick.right(levitato_start, function perk:levitato_grant_effect, function perk:levitato_switch_button_to_stop)
+onClick.right(levitato_start, function perk:levitato_grant_effect, function perk:levitato_switch_button_to_stop_with_slight_delay)
 onClick.right(levitato_stop, function perk:levitato_stop_effect)
+import.item.modifier(levitato_start)
+import.item.modifier(levitato_stop)
 def levitato(){
     forPerk(levi, scoreboard players set @s levi_dur 16)
     forPerk(levi, scoreboard players set @s levi_active 0)
+    forPerk(levi, scoreboard players set @s levi_cd 0)
+    forPerk(levi, scoreboard players set @s levi_regen_cd 0)
+    forPerk(levi, "<give @s carrot_on_a_stick{display:{Name:'{"text":"Activate Levitato","color":>DEFAULT_SPECIAL_TEXT_COLOR<}'},levitato_start:1b}>")
 }
 def levitato_grant_effect(){
-    execute if score @s levi_dur matches 1.. run scoreboard players set @s levi_active 1
-    execute if score @s levi_dur matches 0 run function levitato_stop_effect
-
-    execute if score @s levi_active matches 1 run effect give @s levitation 1 1
-    execute if score @s levi_active matches 1 run scoreboard players remove @s levi_dur 1
-    scoreboard players set @s levi_id 1
-    wait(perk:levitato_grant_effect_loop, 1s, execute if score @s levi_active matches 1)
+    scoreboard players set @s levi_active 1
+    function perk:levitato_grant_effect_loop
 }
 def levitato_grant_effect_loop(){
-    forPerk(levi, execute if score @s levi_id matches 21 run effect give @s levitation 1 1)
-    forPerk(levi, execute if score @s levi_id matches 21 run scoreboard players remove @s levi_dur 1)
-    forPerk(levi, execute if score @s levi_id matches 21 run scoreboard players set @s levi_id 1)
-    loop(1s, execute if score @s levi_active matches 1)
-    execute if score @s levi_dur matches 0 run function levitato_stop_effect
+    function perk:levitato_condition_check
+    execute if score @s levi_active matches 1 run effect give @s levitation 1 1
+    execute if score @s levi_active matches 1 run scoreboard players remove @s levi_dur 1
+    loop.preserve.executor(19t, execute if score @s levi_active matches 1)
 }
-def levitato_id(){
-    forPerk(levi, execute if score @s levi_id matches 1.. run scoreboard players add @s levi_id 1)
+def levitato_condition_check(){
+    execute if score @s levi_dur matches 0 run function perk:levitato_stop_effect
 }
-onTick(function perk:levitato_id)
 def levitato_stop_effect(){
     scoreboard players set @s levi_active 0
-    scoreboard players set @s levi_id 0
     item modify entity @s weapon.mainhand perk:levitato_start
+    function perk:levitato_regen_levitato_dur
+}
+def levitato_switch_button_to_stop_with_slight_delay(){
+    wait.preserve.executor(5t, perk:levitato_switch_button_to_stop, execute if score @s levi_dur matches 1..)
 }
 def levitato_switch_button_to_stop(){
     item modify entity @s weapon.mainhand perk:levitato_stop
 }
-def levitato_regen_levi_dur(){
-    #regen cd update
-    forPerk(levi, execute if score @s levi_active matches 0 if score @s levi_cd matches ..99 run scoreboard players add @s levi_cd 1)
-    forPerk(levi, execute if score @s levi_active matches 1 run scoreboard players set @s levi_cd 0)
+def levitato_regen_levitato_dur(){
+    #regen cd update, and clear if levitato is active again
+    execute if score @s levi_cd matches ..99 run scoreboard players add @s levi_cd 1
+    execute if score @s levi_active matches 1 run scoreboard players set @s levi_cd 0
 
     #start regen when score cd reaches 5 seconds
-    forPerk(levi, execute if score @s levi_cd matches 100 run scoreboard players add @s levi_regen_cd 1)
-    forPerk(levi, execute if score @s levi_regen_cd matches 40 run scoreboard players add @s levi_dur 1)
-    forPerk(levi, execute if score @s levi_regen_cd matches 40 run scoreboard players set @s levi_regen_cd 0)
+    execute if score @s levi_cd matches 100 if score @s levi_dur matches ..15 run scoreboard players add @s levi_regen_cd 1
+    execute if score @s levi_regen_cd matches 40 run scoreboard players add @s levi_dur 1
+    execute if score @s levi_regen_cd matches 40 run scoreboard players set @s levi_regen_cd 0
+
+    #no longer loops if levitato is active again
+    loop.preserve.executor(1t, execute if score @s levi_active matches 0)
 }
 
 onTick(function perk:levitato_regen_levi_dur)
@@ -306,6 +310,7 @@ def start(){
     function perk:deep_forest_explorer
     function perk:deep_ocean_explorer
     function perk:mining_engineer
+    function perk:levitato
 }
 # TODO
 # score.clear
