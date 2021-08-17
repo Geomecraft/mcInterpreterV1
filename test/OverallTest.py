@@ -52,9 +52,10 @@ def LoopBreakAndWaitTest():
     interpreter = setupInterpreter()
     interpreter.options.mainFilePath = "LoopBreakAndWaitTest"
     interpreter.interpretPath()
-def LoopWaitAndWaitPreserveExecutorTest():
+def LoopBreakAndWaitPreserveExecutorTest():
     interpreter = setupInterpreter()
-    interpreter.options.mainFilePath = ""
+    interpreter.options.mainFilePath = "LoopBreakAndWaitPreserveExecutorTest"
+    interpreter.interpretPath()
 #Actual impelmenting stuff, run with caution
 # ManifestTest()
 # NamespaceTest()
@@ -63,4 +64,5 @@ def LoopWaitAndWaitPreserveExecutorTest():
 # DefineUserFunctionsTest()
 # ConstantsTest()
 # LoopBreakAndWaitTest()
+LoopBreakAndWaitPreserveExecutorTest()
 

@@ -280,8 +280,8 @@ def forEachGlobal(interpreter, var, collection, globalFunctionCall):
 
 
 
-def loop(interpreter, fn, interval = "1t", executeIfClause = "", preserve = None):
-    waitThenExecuteFunction(interpreter, fn, interval, fn.name, executeIfClause, preserve)
+def loop(interpreter, fn, interval = "1t", executeIfClause = ""):
+    waitThenExecuteFunction(interpreter, fn, interval, fn.name, executeIfClause)
 LocalBuiltInFunctionsDict["loop"] = loop
 
 def breakMcFunction(interpreter, fn, mcFunction, executeIfClause =""):
@@ -290,17 +290,43 @@ def breakMcFunction(interpreter, fn, mcFunction, executeIfClause =""):
     fn.definition.append(executeIfClause + "schedule clear " + mcFunction)
 LocalBuiltInFunctionsDict["break"] = breakMcFunction
 
-def waitThenExecuteFunction(interpreter, fn, waitTime, mcFunction, executeIfClause = "", preserve = None):
-    #TODO add functionality for preserver position
+def waitThenExecuteFunction(interpreter, fn, waitTime, mcFunction, executeIfClause = ""):
     if executeIfClause[-3:] != "run" and executeIfClause != "":
         executeIfClause += " run "
     fn.definition.append(executeIfClause + "schedule function " + mcFunction + " " + waitTime + " append")
 LocalBuiltInFunctionsDict["wait"] = waitThenExecuteFunction
 
+#These two functions schedule functions wait time in replace mode, which means later schedule replaces the old one, they also cannot be break
+def loopPreserveExecutor(interpreter, fn, interval = "1t", executeIfClause = ""):
+    waitThenExecuteFunctionPreserveExecutor(interpreter, fn, interval, fn.name, executeIfClause)
+LocalBuiltInFunctionsDict["loop.preserve.executor"] = loopPreserveExecutor
+def waitThenExecuteFunctionPreserveExecutor(interpreter, fn, waitTime, mcFunction, executeIfClause = ""):
+    if executeIfClause[-3:] != "run" and executeIfClause != "":
+        executeIfClause += " run "
+    def getWaitTimeInTickScore(rawWaitTime):
+        if rawWaitTime[-1] == "t":
+            return rawWaitTime[:-1]
+        elif rawWaitTime[-1] == "s":
+            return str(int(rawWaitTime[:-1]) * 20)
+        elif rawWaitTime[-1] == "d":
+            return str(int(rawWaitTime[:-1]) * 24000)
+    waitTimeInTickScore = getWaitTimeInTickScore(waitTime)
+    def getSysIdString(interpreter):
+        return "sys_id_" + interpreter.memory.getIndex()
+    onLoad(interpreter, "scoreboard objectives add " + getSysIdString(interpreter) + " dummy")
+    fn.definition.append(executeIfClause + "scoreboard players set @s " + getSysIdString(interpreter) + " 1")
+    onTick(interpreter, "execute as @a[scores={" + getSysIdString(interpreter) + "=1..}] run scoreboard players add @s " + getSysIdString(interpreter) + " 1",
+           "execute as @a[scores={" + getSysIdString(interpreter) + "=" + waitTimeInTickScore + "}] run function " + mcFunction,
+           "execute as @a[scores={" + getSysIdString(interpreter) + "=" + waitTimeInTickScore + "}] run scoreboard players set @s " + getSysIdString(interpreter) + " 0")
+    interpreter.memory.increment()
+LocalBuiltInFunctionsDict["wait.preserve.executor"] = waitThenExecuteFunctionPreserveExecutor
+
 def breakAll(interpreter,fn):
     allfn = interpreter.memory.function.keys()
     for x in allfn:
         fn.definition.append("schedule clear " + x)
+    for i in range(0, interpreter.memory.sysIndex):
+        fn.definition.append("scoreboard players set @a sys_id_" + str(i) + " 0")
 LocalBuiltInFunctionsDict["break.all"] = breakAll
 
 def recipeCustomRestrictPlayer(interpreter, customCraftingRecipeName, selectorArguments):

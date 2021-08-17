@@ -1,0 +1,26 @@
+Manifest(loop break and wait preserve executortest, 7, just for testing )
+namespace.set(test)
+
+#wait
+def wait_then_summon(){
+    say starting test now
+    wait.preserve.executor(2s, test:light)
+}
+def light(){
+    execute at @s run summon minecraft:lightning_bolt
+}
+
+onLoad(scoreboard objectives add test1 dummy)
+def wait_then_summon_2(){
+    say starting test now
+    wait.preserve.executor(40t, test:light, execute if score @s test1 matches 1)
+}
+
+def looping(){
+    say looping
+    loop.preserve.executor(1s)
+}
+
+def stop(){
+    break.all()
+}
