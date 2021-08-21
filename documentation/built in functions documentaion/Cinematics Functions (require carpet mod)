@@ -1,0 +1,73 @@
+
+#Cinematics Functions
+
+The unctions in this module give a natural way to manipulate fake players. 
+It requires the [carpet mod](https://github.com/gnembon/fabric-carpet) as it builds on its functinality on top of it. 
+For example, the carpet mod allows some primitive ways of manipulative players, such as creating a fake player by using `/player -playername- spawn`,
+make a player move forward by `/player -playername- move forward`, etc. This module advances upon these basic functions, and provide functionality such as:
+- make the fake player move from point A to point B
+- make the fake player follows another entity
+- make the fake player stop moving immediatly
+- make the fake player perform natural tasks in the most humane way possible, such as:
+    - combat another player
+    - strip mining
+    - tower
+    - bridge
+    - use long range weapons such as bows and crossbows
+
+##Function Map
+The functions are organised in a very similar way as minecraft command line. Each function is composed of different "parts" instead of just one name.
+For example, in minecraft, when you try to summon an entity, you do not do something like:
+```
+/summonEntityAtLocation(-entityName-, -location-)
+```
+Instead, the funcionality are dispatched through a series of keywords, like this
+```
+/summon -entityName- -location -nbt-
+```
+It asks what you want to do first (summon), after confirming the first, it asks the second choic (entityName), and so on. In this way, it narrows down the possible functionality at each step, thus making organizing the functionality of each command much easier.
+The function naming convention of this script also follows a similar pattern. 
+examples etc. later move this paragraph to the general function documentation...
+
+##parameter definitions
+
+
+##Module Content
+`cin`
+
+This module's prefix
+
+`cin.static`
+
+Any function that starts with `cin.static` will apply whatever effect they have but does not keep updates on the change in parameter. For example, if the function takes in an entity as arguments and move a player towards it, the player will move to where the entity was when the command was issued *even if* the targeted entity already moved to elsewhere.
+
+`cin.dynamic`
+
+Any function that starts with `cin.dynamic` will apply whatever effect with continuous updates on the change in parameter. For example, if the function takes in an entity as arguments and move a player towards it, the player always move to where the entity *currently* is. If the target becomes invalid (in this example, let's say the entity died), then the function will stop updating and the behave the same as `cin.static` using the last valid position of the entity.
+
+`cin.static.face(player, -location- or -entity-)` 
+
+`cin.dynamic.face(player -location- or -entity-)`
+
+Make the `player` turn to face a certain `location` or `entity`. If `location` is a relative or local coordinate, it will execute at the `player`
+
+`cin.static.walk(player -location or -entity-)`
+
+`cin.dynamic.walk(player -location or -entity-)`
+
+Make the `player` walk towards a certain `location` or `entity`. If `location` is a relative or local coordinate, it will execute at the `player`
+
+`cin.static.sprint(player -location or -entity-)`
+
+`cin.dynamic.sprint(player -location or -entity-)`
+
+Make the `player` sprint towards a certain `location` or `entity`, if sprint is canceled due to bumping into obstacles etc., it will resume as soon as possible. If `location` is a relative or local coordinate, it will execute at the `player`
+
+`cin.static.run(player -location or -entity-)`
+
+`cin.dynamic.run(player -location or -entity-)`
+
+Make the `player` sprint while continuously jumping (how a real player would run) towards a certain `location` or `entity`, if sprint is canceled due to bumping into obstacles etc., it will resume as soon as possible. 
+The player will stop jumping when it is less than 5 tiles away from the destination, 
+since it will overshoot destination if reaching it while midair, as the momentum sprint carries does not stop until player touch the ground again to stop. 
+If `location` is a relative or local coordinate, it will execute at the `player`

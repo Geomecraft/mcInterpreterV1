@@ -1,0 +1,54 @@
+Manifest(Cin FaceTest, 7, just for testing )
+namespace.set(test)
+
+def ivu_turn_static(){
+    function test:ivu_face1
+}
+def ivu_face1(){
+    cin.static.face(IvuRingring, ~1 ~1.5 ~)
+    wait(1s, test:ivu_face2)
+}
+def ivu_face2(){
+    cin.static.face(IvuRingring, ~-1 ~1.5 ~)
+    wait(1s, test:ivu_face3)
+}
+def ivu_face3(){
+    cin.static.face(IvuRingring, ~ ~1.5 ~1)
+    wait(1s, test:ivu_face4)
+}
+def ivu_face4(){
+    cin.static.face(IvuRingring, ~ ~1.5 ~-1)
+    wait(1s, test:ivu_face5)
+}
+def ivu_face5(){
+    cin.static.face(IvuRingring, ~ ~5 ~)
+    wait(1s, test:ivu_face6)
+}
+def ivu_face6(){
+    cin.static.face(IvuRingring, ~ ~ ~)
+}
+
+def ivu_face_geo_static(){
+    cin.static.face(IvuRingring, ItsGeomecraft)
+}
+def ivu_face_closest_villager(){
+    cin.static.face(IvuRingring, "<@e[type=villager, limit=1, sort=nearest]>")
+}
+
+def ivu_keep_staring_positive_x(){
+    cin.dynamic.face(IvuRingring, ~5 ~ ~)
+}
+def ivu_face_geo_dynamic(){
+    cin.dynamic.face(IvuRingring, ItsGeomecraft)
+}
+def ivu_face_closest_villager_dynamic(){
+    cin.dynamic.face(IvuRingring, "<@e[type=villager, limit=1, sort=nearest]>")
+}
+
+def ivu_freeze(){
+    cin.freeze(IvuRingring)
+}
+
+def ivu_unfreeze(){
+    cin.unfreeze(IvuRingring)
+}

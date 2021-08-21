@@ -6,16 +6,12 @@ from math import sqrt
 from model.General import assertExistNamespace, stripEachItem
 from model.Parser import parseList, parseFunctionUsage
 import model
-
-
-class BuiltInFunction:
-    def __init__(self, name = ""):
-        self.name = name
-        
+import model.mcfunctionLibrary
 
 #path stuff
 # path = os.getcwd()
 # print("Current working directory is " + '\033[94m' + path + '\033[0m')
+
 INDENT = 4
 GlobalBuiltInFunctionsDict = {}
 LocalBuiltInFunctionsDict = {}
@@ -30,6 +26,11 @@ def registerAsGlobal(function,name):
 
 def registerAsLocal(function, name):
     LocalBuiltInFunctionsDict[name] = function
+
+###loading in other librarys, consider making this automatic if there are a lot of libraries?
+# def importLibrary(interpreter,name):
+#     interpreter.builtInFn
+
 
 
 #Actual functions
@@ -325,7 +326,7 @@ def breakAll(interpreter,fn):
     allfn = interpreter.memory.function.keys()
     for x in allfn:
         fn.definition.append("schedule clear " + x)
-    for i in range(0, interpreter.memory.sysIndex):
+    for i in range(0, interpreter.memory.sysIndex): #TODO any function written after breakAll will not get stopped! need bug fix
         fn.definition.append("scoreboard players set @a sys_id_" + str(i) + " 0")
 LocalBuiltInFunctionsDict["break.all"] = breakAll
 

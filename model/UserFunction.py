@@ -1,7 +1,4 @@
-from model.General import stripEachItem
-from model.BuiltInFunction import GlobalBuiltInFunctionsDict, LocalBuiltInFunctionsDict
 from model.LocalInterpreter import LocalInterpreter
-from model.Syntax import FUNCTION_USAGE_SYNTAX
 from model.Parser import parseFunctionUsage
 
 
@@ -20,6 +17,10 @@ class UserFunction:
         self.definition = definition  # list of string that each line represents a line of command, that may have a parameter waiting to be substituted. The parameter waiting to be subtituted must be wrapped in "/" at begining and end
         self.abstraction = abstraction  # bool
         self.namespace = namespace
+
+    def appendDefinition(self, *loc):
+        for x in loc:
+            self.definition.append(x)
 
     def __str__(self):
         if self.abstraction:

@@ -2,11 +2,11 @@
 "testInput.txt"
 import os
 import re
-from model import BuiltInFunction
-from model.DebugLog import DebugElementInfo, DebugElementMemory, DebugLog
-from model.Exceptions import AbstractionError, IncorrectArguments, SyntaxError, NullError
-from model.General import stripEachItem, assertExistNamespace
-from model.Syntax import CONSTANT_DEFINITION_SYNTAX, FUNCTION_USAGE_SYNTAX, FUNCTION_DEFINITION_SYNTAX, isComment, \
+from model.mcfunctionLibrary import BuiltInFunction, MasterLibrary
+from model.DebugLog import DebugLog
+from model.Exceptions import NullError
+from model.General import assertExistNamespace
+from model.Syntax import isComment, \
     isConstantDefinition, isFunctionDefinition, isFunctionUsage
 from model.Parser import parseFunctionUsage
 from model.UserFunction import UserFunction
@@ -14,7 +14,6 @@ from model.Memory import Memory
 from model.Options import Options
 
 #CONSTANTS
-BUILT_IN_FN = BuiltInFunction.GlobalBuiltInFunctionsDict
 
 class GlobalInterpreter:
 
@@ -32,6 +31,7 @@ class GlobalInterpreter:
         self.currentLineNumber = currentLineNumber #type int
         self.options = options #type Options
         self.debugLog = debugLog #type DebugLog
+        self.builtInFn = MasterLibrary.GlobalBuiltInFunctionsDict
 
     def setContent(self,los):
         self.content = ["placeholder"] + los
@@ -101,10 +101,10 @@ class GlobalInterpreter:
         fnstr = self.getCurrentLine()
         fnName = parseFunctionUsage(fnstr)[0]
         fnlop = parseFunctionUsage(fnstr)[1]
-        if fnName not in BUILT_IN_FN.keys():
+        if fnName not in self.builtInFn.keys():
             raise NullError(self.exceptionLineMsg() + "function not found in any built-in library")
         else:
-            BUILT_IN_FN[fnName](self,*fnlop)
+            self.builtInFn[fnName](self,*fnlop)
 
     def interpret(self):
         while (self.currentLineNumber <= self.maximumLineNumber):

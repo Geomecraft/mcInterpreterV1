@@ -5,7 +5,7 @@ from model.Parser import parseFunctionUsage
 from model.Syntax import isComment, isLocalBuiltInFunctionUsage, isFunctionUsage, isGlobalBuiltInFunctionUsage
 import model
 
-LocalBuiltInFunctionsDict = model.BuiltInFunction.LocalBuiltInFunctionsDict
+LocalBuiltInFunctionsDict = model.mcfunctionLibrary.MasterLibrary.LocalBuiltInFunctionsDict
 
 class LocalInterpreter:
 
