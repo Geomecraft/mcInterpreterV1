@@ -83,7 +83,7 @@ def setCurrentNamespace(interpreter,namespace):
         with open(memory.dataPackName + "/data/minecraft/tags/functions/load.json", 'w') as outfile:
             json.dump(loadData, outfile, indent=INDENT)
         with open(memory.getCurrentNamespacePath() + "/functions/load.mcfunction", 'w') as outfile:
-            outfile.write("")
+            outfile.write("#this function executes upon loading\n")
 
         with open(memory.dataPackName + "/data/minecraft/tags/functions/tick.json", 'r') as infile:
             tickData = json.loads(infile.read())
@@ -91,7 +91,7 @@ def setCurrentNamespace(interpreter,namespace):
         with open(memory.dataPackName + "/data/minecraft/tags/functions/tick.json", 'w') as outfile:
             json.dump(tickData, outfile, indent=INDENT)
         with open(memory.getCurrentNamespacePath() + "/functions/tick.mcfunction", 'w') as outfile:
-            outfile.write("")
+            outfile.write("#this function executes every tick\n")
 
         # add root advancement for this datapack
         createAdvancement(interpreter, "root", {

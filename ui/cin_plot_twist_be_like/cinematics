@@ -1,0 +1,66 @@
+Manifest(when the writer is really good at writing plot twists, 7, first cinematics!)
+Aya = IvuRingring
+Defi = blookySL
+
+namespace.set(gen)
+def clean(){
+    cin.freeze(>Aya<)
+    cin.freeze(>Defi<)
+    wait(2s, gen:clean2)
+}
+def clean2(){
+    clear >Aya<
+    kill >Aya<
+    clear >Defi<
+    kill >Defi<
+}
+
+
+
+namespace.set(outside_temple)
+temple_entrance = -7946 66.5 -11973
+temple_inside = -7947 62.5 -11983
+aya_spawn = -7952 63 -11950
+defi_spawn = -7952 63 -11948
+
+def start(){
+    wait(1t, outside_temple:create_aya)
+    wait(2t, outside_temple:create_defi)
+    wait(20t, outside_temple:aya_run_toward_temple)
+    wait(30t, outside_temple:defi_run_toward_aya)
+}
+def aya_run_toward_temple(){
+    cin.dynamic.face(>Aya<, >temple_entrance<)
+    cin.run(>Aya<)
+}
+def create_aya(){
+    execute positioned >aya_spawn< run player >Aya< spawn
+    gamemode survival >Aya<
+    effect give >Aya< minecraft:regeneration 10000 5 true
+}
+def defi_run_toward_aya(){
+    cin.dynamic.face(>Defi<, >Aya<)
+    cin.run(>Defi<)
+    wait(50t, outside_temple:defi_attack)
+}
+def create_defi(){
+    execute positioned >defi_spawn< run player >Defi< spawn
+    gamemode survival >Defi<
+    effect give >Defi< minecraft:regeneration 10000 5 true
+    give >Defi< diamond_sword{Enchantments:[{}]} 1
+}
+def defi_attack(){
+    say defi attack
+    player >Defi< attack interval 12
+    wait(5t, outside_temple:aya_run_inside_temple)
+}
+
+def aya_run_inside_temple(){
+    cin.dynamic.face(>Aya<, >temple_inside<)
+    cin.sprint(>Aya<)
+}
+
+
+
+
+

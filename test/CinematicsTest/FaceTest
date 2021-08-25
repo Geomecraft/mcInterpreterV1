@@ -52,3 +52,5 @@ def ivu_freeze(){
 def ivu_unfreeze(){
     cin.unfreeze(IvuRingring)
 }
+
+def ivu_nod

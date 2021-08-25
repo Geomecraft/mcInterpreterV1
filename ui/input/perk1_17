@@ -4,7 +4,7 @@ Manifest(perk for 1_17 manhunt, 7, by ItsGeomecraft)
 EFFECT_DEFAULT_LENGTH = 3
 DEFAULT_SPECIAL_TEXT_COLOR = "light_purple"
 DEFAULT_INFO_TEXT_COLOR = "green"
-UNDEAD = [zombie, skeleton,zombified_piglin]
+UNDEAD = [zombie, skeleton, zombified_piglin, drowned, husk, phantom, skeleton_horse, stray, wither, wither_skeleton, zoglin, zombie_horse, zombie_villager]
 SLOT_NUMBERS = [0,1,2,3,4,5,6,7,8]
 
 #some general purpose helper functions
@@ -68,8 +68,8 @@ item.modifier.setNBT(compass_the_end, tag, "<{LodestoneDimension:"minecraft:the_
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~perk~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #-----basic set up-----#
 #PERK CONSTANTS
-PERK_SCORE = [en_re, ho_sm, frag, fa_ca, phoe, d_f_ex, d_o_ex, mi_en, levi]
-HELPER_PERK_SCORE = [ho_sm_count, phoe_charge, d_f_ex_result, d_f_ex_id, d_o_ex_result, levi_dur, levi_cd, levi_regen_cd, levi_active]
+PERK_SCORE = [en_re, ho_sm, frag, fa_ca, phoe, d_f_ex, d_o_ex, mi_en, levi, ra_bo, pyro, ci_ea, ab_ze]
+HELPER_PERK_SCORE = [ho_sm_count, phoe_charge, d_f_ex_result, d_f_ex_id, d_o_ex_result, levi_dur, levi_cd, levi_regen_cd, levi_active, pyro_count, ab_ze_cd]
 
 namespace.set(perk)
 def basic_property_score_setup(){
@@ -115,7 +115,7 @@ def holy_smite(){
     wait(28s, perk:holy_smite_loop)
 }
 def holy_smite_loop(){
-    forPerk(ho_sm, give @s snowball{holy_smite:1b})
+    forPerk(ho_sm, "<give @s snowball{display:{Name:'{"text":"Holy Smite","color":>DEFAULT_SPECIAL_TEXT_COLOR<}'},holy_smite:1b} 1>")
     loop(28s)
 }
 def holy_smite_limit_maximum(){
@@ -236,7 +236,7 @@ def mining_engineer_loop(){
     forPerk(mi_en, execute if entity @s[nbt={SelectedItem:{id:"minecraft:stone_pickaxe"}}] run enchant @s fortune 1)
     forPerk(mi_en, execute if entity @s[nbt={SelectedItem:{id:"minecraft:iron_pickaxe"}}] run enchant @s fortune 2)
     forPerk(mi_en, execute if entity @s[nbt={SelectedItem:{id:"minecraft:diamond_pickaxe"}}] run enchant @s fortune 3)
-    forPerk(execute if entity @s[nbt={SelectedItem:{id:"minecraft:netherite_pickaxe"}}] run item modify entity @s weapon.mainhand perk:fortune4)
+    forPerk(mi_en, execute if entity @s[nbt={SelectedItem:{id:"minecraft:netherite_pickaxe"}}] run item modify entity @s weapon.mainhand perk:fortune4)
     loop()
 }
 
@@ -259,6 +259,7 @@ def levitato_grant_effect_loop(){
     function perk:levitato_condition_check
     execute if score @s levi_active matches 1 run effect give @s levitation 1 1
     execute if score @s levi_active matches 1 run scoreboard players remove @s levi_dur 1
+    execute if score @s levi_active matches 1 run function perk:display_levitato_dur
     loop.preserve.executor(19t, execute if score @s levi_active matches 1)
 }
 def levitato_condition_check(){
@@ -283,13 +284,102 @@ def levitato_regen_levitato_dur(){
     #start regen when score cd reaches 5 seconds
     execute if score @s levi_cd matches 100 if score @s levi_dur matches ..15 run scoreboard players add @s levi_regen_cd 1
     execute if score @s levi_regen_cd matches 40 run scoreboard players add @s levi_dur 1
+    execute if score @s levi_regen_cd matches 40 run function perk:display_levitato_dur
     execute if score @s levi_regen_cd matches 40 run scoreboard players set @s levi_regen_cd 0
 
     #no longer loops if levitato is active again
     loop.preserve.executor(1t, execute if score @s levi_active matches 0)
 }
+def display_levitato_dur(){
+    tellraw @s [{"text":"Levitato Duration Left: ","color":>DEFAULT_INFO_TEXT_COLOR<},{"color":>DEFAULT_SPECIAL_TEXT_COLOR<,"score":{"name":"@s","objective":"levi_dur"}}]
+}
 
-onTick(function perk:levitato_regen_levi_dur)
+def rabbit_boots(){
+    forPerk(ra_bo, "<give @s leather_boots{display:{Name:'{"text":"Rabbit Boots"}'},Unbreakable:1b,Enchantments:[{id:"minecraft:feather_falling",lvl:2s}]} 1>")
+    forPerk(ra_bo, function perk:rabbit_boots_loop)
+}
+def rabbit_boots_loop(){
+    effect give @s minecraft:jump_boost >EFFECT_DEFAULT_LENGTH< 1 true
+    effect give @s minecraft:speed >EFFECT_DEFAULT_LENGTH< 0 true
+    loop.preserve.executor(1t)
+}
+
+onLand(pyro, function perk:pyro_summon_firecharge)
+def pyro(){
+    forPerk(pyro, "<give @s flint_and_steel{display:{Name:'{"text":"Pyro Fire Starter","color":>DEFAULT_SPECIAL_TEXT_COLOR<}'},Unbreakable:1b,Enchantments:[{}]} 1>")
+    function perk:pyro_limit_maximum
+    wait(9s, perk:pyro_loop)
+}
+def pyro_loop(){
+    forPerk(pyro, "<give @s snowball{display:{Name:'{"text":"Throwable Clustered Firecharge","color":>DEFAULT_SPECIAL_TEXT_COLOR<}'},pyro:1b} 1>")
+    loop(9s)
+}
+def pyro_summon_firecharge(){
+    data merge entity @e[type=!minecraft:player,distance=..3,limit=1] {Fire:140s}
+    summon small_fireball ~ ~ ~ {power:[0.0,-0.1,0.0]}
+    summon small_fireball ~1 ~ ~ {power:[0.0,-0.1,0.0]}
+    summon small_fireball ~-1 ~ ~ {power:[0.0,-0.1,0.0]}
+    summon small_fireball ~ ~ ~1 {power:[0.0,-0.1,0.0]}
+    summon small_fireball ~ ~ ~-1 {power:[0.0,-0.1,0.0]}
+    summon small_fireball ~1 ~ ~1 {power:[0.0,-0.1,0.0]}
+    summon small_fireball ~1 ~ ~-1 {power:[0.0,-0.1,0.0]}
+    summon small_fireball ~-1 ~ ~1 {power:[0.0,-0.1,0.0]}
+    summon small_fireball ~-1 ~ ~-1 {power:[0.0,-0.1,0.0]}
+}
+def pyro_limit_maximum(){
+    forPerk(pyro, execute store result score @s pyro_count run clear @s minecraft:snowball{pyro:1b} 0)
+    forPerk(pyro, execute if score @s pyro_count matches 9.. run clear @s minecraft:snowball{pyro:1b} 1)
+    loop()
+}
+
+recipe.custom.shaped(lil_bird_wings, "<elytra{display:{Name:'{"text":"Lil\' bird\'s wings","color":>DEFAULT_SPECIAL_TEXT_COLOR<}'},RepairCost:40,Damage:392}>", 1, feather, stick, feather, feather, stick, feather, feather, stick, feather)
+recipe.custom.restrict(lil_bird_wings, [scores={ci_ea=1}])
+recipe.custom.shaped(firehawk_wings, "<elytra{display:{Name:'{"text":"Firehawk\'s Wings","color":>DEFAULT_SPECIAL_TEXT_COLOR<}'},RepairCost:40,Damage:312,Enchantments:[{id:"minecraft:fire_protection",lvl:4s}]}>", 1, feather, blaze_rod, feather, feather, blaze_rod, feather, feather, blaze_rod, feather)
+recipe.custom.restrict(firehawk_wings, [scores={ci_ea=1}])
+recipe.custom.shaped(true_eagle_wings, "<elytra{display:{Name:'{"text":"True Eagle\'s Wings","color":>DEFAULT_SPECIAL_TEXT_COLOR<}'},RepairCost:0,Damage:0,Enchantments:[{id:"minecraft:protection",lvl:4s}]}>", 1, feather, stick, feather, phantom_membrane, stick, phantom_membrane, feather, stick, feather)
+recipe.custom.restrict(true_eagle_wings, [scores={ci_ea=1}])
+def circling_eagle(){
+    function perk:circling_eagle_loop
+}
+def circling_eagle_loop(){
+    forPerk(ci_ea, effect give @s minecraft:night_vision 60 0 true)
+    loop()
+}
+
+onClick.right(ab_ze, function perk:absolute_zero_effect)
+def absolute_zero(){
+    forPerk(ab_ze, scoreboard players set @s ab_ze_cd 16)
+    function perk:absolute_zero_loop
+    forPerk(ab_ze, "<give @s carrot_on_a_stick{display:{Name:'{"text":"Snow Storm","color":>DEFAULT_SPECIAL_TEXT_COLOR<}'},ab_ze:1b} 1>")
+    forPerk(ab_ze, "<give @s diamond_boots{display:{Name:'{"text":"Freezing Heels","color":>DEFAULT_SPECIAL_TEXT_COLOR<}',Lore:['{"text":"Freezing Aura IV","color":"gray","italic":false}']},Unbreakable:1b,Enchantments:[{id:"minecraft:frost_walker",lvl:3s}]} 1>")
+    wait(1s, perk:absolute_zero_cd_loop)
+}
+def absolute_zero_loop(){
+    forPerk(ab_ze, "<execute if entity @s[nbt={Inventory:[{Slot:100b,tag:{display:{Lore:['{"text":"Freezing Aura IV","color":"gray","italic":false}']}}}]}] run execute as @e[type=!minecraft:item,type=!minecraft:player,type=!minecraft:skeleton, distance=0.01..14] at @s run data merge entity @s {TicksFrozen:220}>")
+    loop(1s)
+}
+def absolute_zero_cd_loop(){
+    forPerk(ab_ze, execute if score @s ab_ze_cd matches 1.. run scoreboard players remove @s ab_ze_cd 1)
+    loop(1s)
+}
+def absolute_zero_effect(){
+    execute if score @s ab_ze_cd matches 1.. run tellraw @s [{"text":"Snow Storm will be ready in ","color":>DEFAULT_INFO_TEXT_COLOR<},{"color":>DEFAULT_SPECIAL_TEXT_COLOR<,"score":{"name":"@s","objective":"ab_ze_cd"}},{"text":" seconds","color":>DEFAULT_INFO_TEXT_COLOR<}]
+    execute if score @s ab_ze_cd matches 0 run function perk:absolute_zero_produce_snow
+    execute if score @s ab_ze_cd matches 0 run scoreboard players set @s ab_ze_cd 16
+}
+ZERO_LIST = [2,3,4,5,6,7,8,9,10,11,12,13,14]
+def absolute_zero_produce_snow(){
+    for.each(x, >ZERO_LIST<, setblock ^ ^1.5 ^<x> minecraft:powder_snow keep)
+    for.each(x, >ZERO_LIST<, setblock ^-1 ^1.5 ^<x> minecraft:powder_snow keep)
+    for.each(x, >ZERO_LIST<, setblock ^1 ^1.5 ^<x> minecraft:powder_snow keep)
+    for.each(x, >ZERO_LIST<, setblock ^ ^0.5 ^<x> minecraft:powder_snow keep)
+    for.each(x, >ZERO_LIST<, setblock ^-1 ^0.5 ^<x> minecraft:powder_snow keep)
+    for.each(x, >ZERO_LIST<, setblock ^1 ^0.5 ^<x> minecraft:powder_snow keep)
+    for.each(x, >ZERO_LIST<, setblock ^1 ^2.5 ^<x> minecraft:powder_snow keep)
+    for.each(x, >ZERO_LIST<, setblock ^1 ^2.5 ^<x> minecraft:powder_snow keep)
+    for.each(x, >ZERO_LIST<, setblock ^1 ^2.5 ^<x> minecraft:powder_snow keep)
+}
+
 #-----actual perk-----#
 #-----starting function-----#
 #main function
@@ -311,6 +401,10 @@ def start(){
     function perk:deep_ocean_explorer
     function perk:mining_engineer
     function perk:levitato
+    function perk:rabbit_boots
+    function perk:pyro
+    function perk:circling_eagle
+    function perk:absolute_zero
 }
 # TODO
 # score.clear

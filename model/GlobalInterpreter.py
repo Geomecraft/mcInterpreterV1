@@ -2,6 +2,9 @@
 "testInput.txt"
 import os
 import re
+from copy import copy, deepcopy
+
+from model.FileManage import clearDirectory
 from model.mcfunctionLibrary import BuiltInFunction, MasterLibrary
 from model.DebugLog import DebugLog
 from model.Exceptions import NullError
@@ -108,6 +111,7 @@ class GlobalInterpreter:
 
     def interpret(self):
         while (self.currentLineNumber <= self.maximumLineNumber):
+            print(self.currentLineNumber)
             if isComment(self.getCurrentLine()):
                 self.interpretAsComment()
             elif isFunctionDefinition(self.getCurrentLine()):
@@ -117,13 +121,17 @@ class GlobalInterpreter:
             elif isConstantDefinition(self.getCurrentLine()):
                 self.interpretAsConstantDefinition()
             self.currentLineNumber += 1
-            print(self.currentLineNumber)
 
     def interpretPath(self):
         self.setContentFromPath()
+        clearDirectory(self.options.datapackOutputPath)
         os.chdir(self.options.basePath + "/" + self.options.datapackOutputPath)
 
+        # interpreterCopy = deepcopy(self)
+        # interpreterCopy.interpret()
+
         self.interpret()
+
 
         #change back to original path
         os.chdir(self.options.basePath)
